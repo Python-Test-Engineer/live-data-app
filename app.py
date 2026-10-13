@@ -10,7 +10,10 @@ CLI modes:
     uv run app.py --collect          -> run one ETL snapshot and append it to
                                         history.csv (exit 0 on success, 1 on
                                         failure; for cron / Task Scheduler).
-    uv run app.py --collect --quiet  -> same, without the summary line.
+    uv run app.py --snapshot         -> fetch live data and write one
+                                        DEMO_DATA_<stamp>.csv to data/snapshots/
+                                        (no history.csv / web-app involvement).
+    uv run app.py --snapshot --quiet -> same, without the summary line.
 
 Web UI:
     * GET  /       run the live ETL and render KPIs, charts, and the table.
@@ -67,6 +70,9 @@ def main() -> int:
     if "--collect" in sys.argv:
         quiet = "--quiet" in sys.argv
         sys.exit(utils.run_snapshot(quiet))
+    if "--snapshot" in sys.argv:
+        quiet = "--quiet" in sys.argv
+        sys.exit(utils.run_demo_snapshot(quiet))
     print("Starting Brighton Bikeshare dashboard on http://127.0.0.1:5000")
     app.run(debug=False, host="127.0.0.1", port=5000)
     return 0

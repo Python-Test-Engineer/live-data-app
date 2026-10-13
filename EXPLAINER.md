@@ -62,9 +62,11 @@ The browser page (`templates/index.html`) shows:
 | `data/` | Output folder (history.csv, per-feed CSVs, snapshots/ DEMO_DATA_*.csv) — gitignored |
 
 `utils.py` is where the actual work lives; `app.py` just wires it to the browser and the CLI. The
-two "scripts" from the older layout are folded in here:
+older "scripts" are folded in here:
 - `data.py` → `utils.run_full_pipeline()` (re-pull every feed → per-feed CSVs + DEMO snapshot)
 - `collect.py` → `app.py --collect` (run one ETL snapshot into history.csv)
+- `--snapshot` → `utils.run_demo_snapshot()` → `utils.snapshot_current_data()` (live data only,
+  one `data/snapshots/DEMO_DATA_<stamp>.csv`, no history.csv)
 
 ---
 
@@ -91,17 +93,27 @@ which re-pulls every feed, writes a timestamped `DEMO_DATA_<stamp>.csv` into `da
 the fetch log inline before reloading. (Same thing from curl: `curl -X POST http://127.0.0.1:5000/run`.)
 
 ### Collect data on a schedule (recommended)
-History grows fast if you poll every few minutes, and you don't need the page open:
+History grows fast if you poll every few minutes, and you don't need the page open. There are
+**two distinct collection modes** — pick the one you want:
 
 ```bash
-uv run app.py --collect            # fetch + append one snapshot, print a summary
-uv run app.py --collect --quiet    # same, no console output (exit 0 = success)
+uv run app.py --collect            # full ETL snapshot -> appended to data/history.csv
+uv run app.py --snapshot           # live data only  -> data/snapshots/DEMO_DATA_<stamp>.csv
+uv run app.py --snapshot --quiet   # same, no console output (exit 0 = success)
 ```
+
+`--snapshot` explicitly does **not** write to `history.csv`; it writes a standalone, timestamped
+demo file per run (119 stations × 12 cols) — use it when you only want demo data for analysis and
+don't want the web app's history series growing. Exit code is 0 on success, 1 on failure, so both
+modes are cron-friendly.
 
 To schedule it every 5 minutes on Windows (replace the python path with `where python`):
 ```
-schtasks /Create /TN "BrightonBikeshareCollect" /SC MINUTE /MO 5 /TR "\"C:\path\to\python.exe\" \"C:\Users\mrcra\Desktop\live-data-app\app.py\" --collect"
+schtasks /Create /TN "BrightonBikeshareCollect" /SC MINUTE /MO 5 /TR "\"C:\path\to\python.exe\" \"C:\Users\mrcra\Desktop\live-data-app\app.py\" --snapshot --quiet"
 ```
+The repo is currently wired to a **Hermes cron job** (`bikeshare-collect-5min`, every 5 min) that
+runs `uv run app.py --snapshot --quiet` and drops one `DEMO_DATA_<stamp>.csv` into `data/snapshots/`
+per tick.
 
 ### Raw per-feed CSVs
 `utils.run_full_pipeline()` also writes one CSV per feed into `data/` (station_information.csv,

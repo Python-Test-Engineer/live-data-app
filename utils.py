@@ -372,6 +372,26 @@ def count_snapshots() -> int:
 # ---------------------------------------------------------------------------
 # CLI / scheduler runner (formerly collect.py)
 # ---------------------------------------------------------------------------
+def run_demo_snapshot(quiet: bool = False) -> int:
+    """Fetch live status + station info and write one DEMO_DATA_<stamp>.csv to
+    data/snapshots/. Deliberately separate from run_etl()/history.csv so the
+    cron can collect raw demo snapshots without touching the web-app history.
+
+    Returns 0 only if a snapshot file was written, else 1 (for cron / Task
+    Scheduler)."""
+    try:
+        report = snapshot_current_data()
+        if "[save] DEMO_DATA_" not in report:
+            print(report, file=sys.stderr)
+            return 1
+        if not quiet:
+            print(report)
+        return 0
+    except Exception as e:  # noqa: BLE001 - surface failure as nonzero exit
+        print(f"Snapshot failed: {e}", file=sys.stderr)
+        return 1
+
+
 def run_snapshot(quiet: bool = False) -> int:
     """Run one ETL snapshot and append it to history.csv.
 
