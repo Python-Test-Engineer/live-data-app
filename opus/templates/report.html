@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Analyst · Beryl Brighton bikeshare</title>
+<script src="{{ plotly_src }}"></script>
+<style>
+  :root { --ink:#1d2330; --muted:#667085; --bg:#f6f7f9; --card:#fff; --line:#e4e7ec;
+          --critical:#d7263d; --high:#f49d37; --medium:#3f88c5; --info:#7f8c8d; --ok:#44af69; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+         color:var(--ink); background:var(--bg); line-height:1.5; }
+  header { background: linear-gradient(120deg,#101828 0%,#1f3a5f 60%,#2e86ab 100%); color:#fff; padding:36px 48px 28px; }
+  header h1 { margin:0 0 6px; font-size:30px; letter-spacing:-0.02em; }
+  header p { margin:0; opacity:.85; }
+  .tag { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:600;
+         background:rgba(255,255,255,.15); margin-right:6px; }
+  main { max-width:1280px; margin:0 auto; padding:28px 32px 80px; }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; margin:-46px 0 26px; }
+  .kpi { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px;
+         box-shadow:0 4px 14px rgba(16,24,40,.06); }
+  .kpi b { display:block; font-size:26px; letter-spacing:-0.02em; }
+  .kpi span { color:var(--muted); font-size:13px; }
+  h2 { margin:38px 0 14px; font-size:22px; letter-spacing:-0.01em; }
+  .summary { background:var(--card); border:1px solid var(--line); border-left:6px solid var(--critical);
+             border-radius:14px; padding:18px 24px; }
+  .summary ol { margin:6px 0; padding-left:22px; }
+  .summary li { margin:8px 0; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; margin:16px 0;
+          border-left:6px solid var(--info); overflow:hidden; }
+  .card.critical { border-left-color:var(--critical); } .card.high { border-left-color:var(--high); }
+  .card.medium { border-left-color:var(--medium); }
+  .card .body { padding:18px 24px; }
+  .card h3 { margin:0 0 8px; font-size:18px; }
+  .meta { font-size:12.5px; color:var(--muted); margin-bottom:10px; }
+  .sev { font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+  .sev.critical { color:var(--critical); } .sev.high { color:var(--high); } .sev.medium { color:var(--medium); }
+  .conf { display:inline-block; width:70px; height:6px; background:var(--line); border-radius:3px; vertical-align:middle; }
+  .conf i { display:block; height:100%; background:var(--ok); border-radius:3px; }
+  .row { display:grid; grid-template-columns: 110px 1fr; gap:4px 12px; font-size:14.5px; }
+  .row dt { color:var(--muted); font-weight:600; }
+  .row dd { margin:0; }
+  .action dd { font-weight:600; }
+  .chart { border-top:1px solid var(--line); min-height:120px; }
+  details summary { cursor:pointer; color:var(--medium); font-size:13.5px; margin-top:10px; }
+  table { border-collapse:collapse; width:100%; font-size:14px; background:var(--card); }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); }
+  th { background:#f2f4f7; font-weight:600; }
+  .pick { color:var(--ok); font-weight:700; } .drop { color:var(--critical); font-weight:700; }
+  .brief { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px 26px; white-space:pre-wrap; }
+  .bar { position:sticky; top:0; z-index:10; background:#101828; color:#fff; padding:8px 48px; display:flex; gap:14px; align-items:center; }
+  .bar button { background:#2e86ab; color:#fff; border:0; border-radius:8px; padding:8px 16px; font-weight:600; cursor:pointer; }
+  .bar button:disabled { opacity:.5; cursor:wait; }
+  .bar pre { margin:0; max-height:220px; overflow:auto; font-size:12px; }
+  nav a { color:#cfe3f3; margin-right:14px; font-size:13.5px; text-decoration:none; }
+  footer { color:var(--muted); font-size:12.5px; text-align:center; margin-top:40px; }
+</style>
+</head>
+<body>
+{% if analyse_button %}
+<div class="bar">
+  <button id="run">Re-run AI analysis</button>
+  <span id="status" style="font-size:13px;opacity:.8">Analyses every snapshot in data/snapshots</span>
+</div>
+<div class="bar" id="outbar" style="display:none"><pre id="out"></pre></div>
+{% endif %}
+<header>
+  <span class="tag">Brighton web-dev meetup</span><span class="tag">AI analyst demo</span>
+  <h1>What the data is telling us — and what to do about it</h1>
+  <p>Beryl Brighton bikeshare · {{ ctx.n_snap }} snapshots · {{ ctx.n_stations }} stations ·
+     {{ ctx.start.strftime('%a %d %b %Y %H:%M') if ctx.start.strftime is defined else ctx.start }} →
+     {{ ctx.end.strftime('%H:%M') if ctx.end.strftime is defined else ctx.end }} ({{ '%.1f'|format(ctx.span_h) }} h)</p>
+  <nav style="margin-top:12px">
+    <a href="#summary">Summary</a><a href="#data_quality">Data forensics</a><a href="#statistical">Statistics</a>
+    <a href="#time_series">Time series</a><a href="#optimisation">Actions</a><a href="#route">Van route</a><a href="#limits">Limits</a>
+  </nav>
+</header>
+<main>
+  {% set crit = insights|selectattr('severity','equalto','critical')|list %}
+  {% set plan = insights|selectattr('id','equalto','D2_rebalancing_plan')|list %}
+  <div class="kpis">
+    <div class="kpi"><b>{{ insights|length }}</b><span>insights generated</span></div>
+    <div class="kpi"><b style="color:var(--critical)">{{ crit|length }}</b><span>critical issues</span></div>
+    {% if plan %}<div class="kpi"><b>{{ plan[0].evidence.moved }}</b><span>vehicles to move ({{ '%.1f'|format(plan[0].evidence.km) }} km)</span></div>
+    <div class="kpi"><b style="color:var(--ok)">{{ '%.1f'|format(plan[0].evidence.saved_station_h) }} h</b><span>station failure avoided</span></div>{% endif %}
+    <div class="kpi"><b>{{ '%.0f'|format(ctx.data_conf * 100) }}%</b><span>data confidence</span></div>
+  </div>
+
+  {% if brief %}<h2>AI briefing <small style="color:var(--muted);font-size:13px">(LLM-narrated · every number validated against the evidence)</small></h2>
+  <div class="brief">{{ brief }}</div>{% endif %}
+
+  <h2 id="summary">Do these first</h2>
+  <div class="summary"><ol>
+    {% for i in insights if i.category != 'data_quality' %}{% if loop.index <= 5 %}
+    <li><b>{{ i.title }}</b> — {{ i.action }} <span style="color:var(--muted)">({{ i.owner }} · {{ i.expected_impact }})</span></li>
+    {% endif %}{% endfor %}
+  </ol></div>
+
+  {% set cats = [('data_quality','1 · Data forensics — the AI questions the data'),
+                 ('statistical','2 · Statistical X-ray'),
+                 ('time_series','3 · Time-series story'),
+                 ('optimisation','4 · Optimisation — what to do')] %}
+  {% for key, head in cats %}
+  <h2 id="{{ key }}">{{ head }}</h2>
+  {% for i in insights if i.category == key %}
+  <div class="card {{ i.severity }}">
+    <div class="body">
+      <h3>{{ i.title }}</h3>
+      <div class="meta"><span class="sev {{ i.severity }}">{{ i.severity }}</span> ·
+        owner <b>{{ i.owner }}</b>{% if i.when %} · when <b>{{ i.when }}</b>{% endif %} ·
+        confidence <span class="conf"><i style="width:{{ (i.confidence*100)|round }}%"></i></span> {{ (i.confidence*100)|round|int }}%
+      </div>
+      <dl class="row">
+        <dt>Finding</dt><dd>{{ i.finding }}</dd>
+      </dl>
+      <dl class="row action">
+        <dt>Action</dt><dd>{{ i.action }}</dd>
+      </dl>
+      <dl class="row">
+        <dt>Impact</dt><dd>{{ i.expected_impact }}</dd>
+        {% if i.kpi %}<dt>Measure</dt><dd>{{ i.kpi }}</dd>{% endif %}
+        {% if i.limitations %}<dt>Limits</dt><dd style="color:var(--muted)">{{ i.limitations }}</dd>{% endif %}
+      </dl>
+      {% if i.evidence %}<details><summary>Evidence (raw numbers)</summary><pre style="font-size:12px">{{ i.evidence|tojson(indent=2) }}</pre></details>{% endif %}
+    </div>
+    {% for c in i.chart_ids if c in figs_json %}<div class="chart" data-fig="{{ c }}"></div>{% endfor %}
+  </div>
+  {% endfor %}
+  {% endfor %}
+
+  {% if route %}
+  <h2 id="route">Van stop list</h2>
+  <table><tr><th>#</th><th>Action</th><th>Station</th><th>Vehicles</th><th>Van load after</th><th>Leg km</th></tr>
+  {% for r in route %}<tr><td>{{ r.seq }}</td><td class="{{ r.action }}">{{ 'PICK UP' if r.action=='pick' else 'DROP' }}</td>
+    <td>{{ r.name }}</td><td>{{ r.qty }}</td><td>{{ r.load_after }}</td><td>{{ '%.2f'|format(r.leg_km) }}</td></tr>{% endfor %}
+  </table>
+  {% endif %}
+
+  {% set used = [] %}{% for i in insights %}{% for c in i.chart_ids %}{% set _ = used.append(c) %}{% endfor %}{% endfor %}
+  {% set extra = figs_json.keys()|reject('in', used)|list %}
+  {% if extra %}<h2>More evidence</h2>
+  {% for c in extra %}<div class="card"><div class="chart" data-fig="{{ c }}"></div></div>{% endfor %}{% endif %}
+
+  <h2 id="limits">What I'd need to be more certain</h2>
+  <div class="summary" style="border-left-color:var(--medium)"><ul>
+    {% for k, why in ctx.skipped.items() %}<li><b>{{ k }}</b> not run — {{ why }}</li>{% endfor %}
+    <li>Collect every 5 minutes for ≥ 7 days (data confidence is {{ '%.0f'|format(ctx.data_conf*100) }}% now).</li>
+    <li>Trip-level origin/destination data would replace flow proxies with real demand.</li>
+    <li>Weather and event calendars would explain peaks and change points.</li>
+  </ul></div>
+  <footer>Generated {{ generated }} by opus/analysis.py · code computes, AI reasons · every chart is interactive (hover, zoom)</footer>
+</main>
+<script>
+const FIGS = {{ figs_json|tojson }};
+const draw = el => {
+  if (el.dataset.done) return;
+  el.dataset.done = 1;
+  const f = JSON.parse(FIGS[el.dataset.fig]);
+  Plotly.newPlot(el, f.data, f.layout, {responsive: true, displaylogo: false});
+};
+const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && draw(e.target)), {rootMargin: '400px'});
+document.querySelectorAll('[data-fig]').forEach(el => io.observe(el));
+{% if analyse_button %}
+document.getElementById('run').onclick = async () => {
+  const b = document.getElementById('run'), out = document.getElementById('out');
+  b.disabled = true; document.getElementById('status').textContent = 'Analysing…';
+  document.getElementById('outbar').style.display = 'block'; out.textContent = '';
+  try {
+    const r = await fetch('/analyse', {method: 'POST'}); const j = await r.json();
+    out.textContent = j.output;
+    if (j.ok) { document.getElementById('status').textContent = 'Done — reloading'; setTimeout(() => location.reload(), 900); }
+    else { document.getElementById('status').textContent = 'Failed (exit ' + j.returncode + ')'; b.disabled = false; }
+  } catch (e) { out.textContent = String(e); b.disabled = false; }
+};
+{% endif %}
+</script>
+</body>
+</html>
