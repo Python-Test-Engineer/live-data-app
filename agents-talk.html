@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who Are These AI Data Intelligence Agents? — Brighton</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0b1221;
+  --panel: #111d31;
+  --panel-raised: #17263d;
+  --line: #293b55;
+  --text: #edf4ff;
+  --muted: #9aacc4;
+  --cyan: #54d5f2;
+  --mint: #6ee7b7;
+  --amber: #f7bd61;
+  --coral: #ff866d;
+  --purple: #b9a0ff;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--text);
+  font-family: "Segoe UI", Inter, system-ui, -apple-system, sans-serif;
+  background:
+    radial-gradient(ellipse at 77% 5%, rgba(31, 86, 128, .24), transparent 35rem),
+    radial-gradient(ellipse at 6% 72%, rgba(37, 82, 77, .15), transparent 32rem),
+    var(--bg);
+}
+button { font: inherit; }
+.shell { width: min(1500px, calc(100% - 64px)); margin: 0 auto; padding: 22px 0 18px; }
+.topbar { display:flex; align-items:center; justify-content:space-between; gap:20px; min-height:34px; }
+.brand { display:flex; align-items:center; gap:10px; color:#d9e8fb; font-size:13px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+.brand-mark { display:grid; place-items:center; width:27px; height:27px; border-radius:9px; color:#081323; background:var(--cyan); font-size:14px; box-shadow:0 0 24px rgba(84,213,242,.25); }
+.session-badge { display:flex; align-items:center; gap:9px; border:1px solid rgba(247,189,97,.28); background:rgba(247,189,97,.07); color:#f6d69e; border-radius:999px; padding:7px 12px; font:700 10px/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing:.11em; }
+.badge-dot { width:7px; height:7px; border-radius:50%; background:var(--amber); box-shadow:0 0 12px var(--amber); }
+.intro { display:flex; align-items:end; justify-content:space-between; gap:35px; padding:18px 0 18px; }
+.eyebrow { color:var(--cyan); font:700 11px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing:.16em; text-transform:uppercase; margin-bottom:9px; }
+h1 { margin:0; max-width:850px; font-size:clamp(34px, 4vw, 56px); line-height:.99; letter-spacing:-.055em; font-weight:760; }
+h1 em { color:var(--cyan); font-style:normal; }
+.intro-copy { max-width:360px; color:var(--muted); font-size:14px; line-height:1.55; padding-bottom:3px; }
+.intro-copy strong { color:#dce9fa; font-weight:650; }
+.layout { display:grid; grid-template-columns:260px minmax(0, 1fr); gap:16px; align-items:stretch; }
+.agenda, .presentation { border:1px solid rgba(131,160,195,.18); border-radius:17px; background:rgba(17,29,49,.88); box-shadow:0 18px 48px rgba(0,0,0,.2); }
+.agenda { padding:17px 13px 13px; display:flex; flex-direction:column; }
+.agenda-heading { display:flex; align-items:center; justify-content:space-between; padding:0 7px 12px; }
+.agenda-heading h2 { margin:0; color:#aabbd2; font-size:11px; text-transform:uppercase; letter-spacing:.14em; }
+.agenda-heading span { color:#6f849f; font:11px ui-monospace,monospace; }
+.agenda-list { display:grid; gap:5px; }
+.agenda-item { position:relative; display:grid; grid-template-columns:30px 1fr auto; gap:9px; align-items:center; width:100%; text-align:left; padding:10px 8px; border:1px solid transparent; border-radius:11px; color:var(--muted); background:transparent; cursor:pointer; transition:background .22s,border-color .22s,color .22s,transform .22s; }
+.agenda-item:hover { color:var(--text); background:rgba(255,255,255,.035); transform:translateX(2px); }
+.agenda-item[aria-current="step"] { color:var(--text); background:linear-gradient(100deg,rgba(84,213,242,.12),rgba(84,213,242,.035)); border-color:rgba(84,213,242,.25); }
+.agenda-num { display:grid; place-items:center; width:28px; height:28px; border-radius:9px; background:rgba(144,166,194,.1); color:#9baec6; font:700 11px ui-monospace,monospace; }
+.agenda-item[aria-current="step"] .agenda-num { background:var(--cyan); color:#082032; }
+.agenda-name { font-size:12px; font-weight:650; line-height:1.2; }
+.agenda-time { color:#7186a0; font:10px ui-monospace,monospace; }
+.agenda-foot { margin-top:auto; padding:15px 8px 3px; border-top:1px solid rgba(137,161,190,.14); color:#788da7; font-size:11px; line-height:1.45; }
+.agenda-foot b { color:#b4c5da; }
+.presentation { min-width:0; padding:13px; display:grid; grid-template-rows:minmax(310px, 1fr) auto; gap:11px; }
+.scene { position:relative; min-height:340px; overflow:hidden; border:1px solid rgba(133,164,197,.16); border-radius:13px; background-color:#0c1729; background-image:linear-gradient(rgba(154,180,210,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(154,180,210,.04) 1px,transparent 1px),radial-gradient(ellipse at 50% 53%,rgba(28,66,95,.33),transparent 57%); background-size:32px 32px,32px 32px,auto; }
+.scene-topline { position:absolute; z-index:2; top:15px; left:17px; right:17px; display:flex; justify-content:space-between; align-items:center; pointer-events:none; }
+.scene-label { color:#8ca2bd; font:700 10px ui-monospace,monospace; letter-spacing:.14em; text-transform:uppercase; }
+.scene-state { display:inline-flex; align-items:center; gap:7px; border:1px solid rgba(110,231,183,.22); background:rgba(110,231,183,.07); border-radius:999px; padding:6px 9px; color:#9de8c8; font:10px ui-monospace,monospace; letter-spacing:.04em; }
+.scene-state i { width:6px; height:6px; border-radius:50%; background:var(--mint); box-shadow:0 0 10px var(--mint); }
+.diagram { width:100%; height:100%; min-height:340px; display:block; }
+.diagram text { font-family:"Segoe UI",system-ui,sans-serif; user-select:none; }
+.lane-label { fill:#7188a3; font-size:11px; font-weight:700; letter-spacing:2px; }
+.node { fill:#12223a; stroke:#38506d; stroke-width:1.5; transition:stroke .35s,fill .35s,filter .35s; }
+.node-cap { fill:#a9bdd5; font-size:12px; font-weight:700; letter-spacing:.5px; }
+.node-sub { fill:#7188a3; font-size:10px; }
+.node-icon { fill:#8da4c0; font-size:16px; font-weight:700; }
+.flow { fill:none; stroke:#344a67; stroke-width:2; stroke-dasharray:6 8; transition:stroke .35s,opacity .35s; }
+.flow-hot { stroke:var(--cyan); stroke-dasharray:7 7; filter:drop-shadow(0 0 4px rgba(84,213,242,.7)); animation:dash 1.2s linear infinite; }
+.harness-frame { fill:rgba(185,160,255,.025); stroke:#584e79; stroke-width:1.4; stroke-dasharray:5 5; transition:stroke .35s,fill .35s,filter .35s; }
+.harness-caption { fill:#b9a0ff; font-size:10px; font-weight:700; letter-spacing:1.4px; }
+.decision { fill:#292342; stroke:#8d77c5; stroke-width:1.5; }
+.active-cyan .node { stroke:var(--cyan); fill:#102f43; filter:drop-shadow(0 0 11px rgba(84,213,242,.24)); }
+.active-mint .node { stroke:var(--mint); fill:#12352f; filter:drop-shadow(0 0 11px rgba(110,231,183,.2)); }
+.active-amber .node { stroke:var(--amber); fill:#392d1d; filter:drop-shadow(0 0 11px rgba(247,189,97,.2)); }
+.active-purple .harness-frame { stroke:var(--purple); fill:rgba(185,160,255,.06); filter:drop-shadow(0 0 9px rgba(185,160,255,.15)); }
+.active-purple .node { stroke:var(--purple); fill:#292342; filter:drop-shadow(0 0 11px rgba(185,160,255,.2)); }
+.active-purple .model-node { stroke:var(--purple); fill:#292342; }
+.packet { fill:var(--cyan); filter:drop-shadow(0 0 6px var(--cyan)); animation:travel 3s linear infinite; }
+.packet.p2 { fill:var(--mint); filter:drop-shadow(0 0 6px var(--mint)); animation-delay:-1.35s; }
+.route-muted { opacity:.23; }
+.caption-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(255px,.52fr); gap:11px; }
+.explain, .audience { min-height:112px; border:1px solid rgba(133,164,197,.15); border-radius:12px; padding:13px 15px; background:rgba(20,34,55,.8); }
+.explain { display:flex; flex-direction:column; justify-content:center; }
+.step-kicker { color:var(--cyan); font:700 10px ui-monospace,monospace; letter-spacing:.12em; text-transform:uppercase; }
+.explain h2 { margin:5px 0 4px; font-size:18px; letter-spacing:-.025em; }
+.explain p { max-width:720px; margin:0; color:#a7b8cf; font-size:12px; line-height:1.5; }
+.takeaway { margin-top:7px; color:#d5e3f4; font-size:11px; font-weight:650; }
+.takeaway span { color:var(--mint); margin-right:5px; }
+.audience { display:flex; flex-direction:column; justify-content:center; position:relative; overflow:hidden; background:linear-gradient(135deg,rgba(247,189,97,.08),rgba(20,34,55,.88) 70%); }
+.audience::after { content:"?"; position:absolute; right:12px; bottom:-27px; color:rgba(247,189,97,.07); font-size:106px; font-weight:800; line-height:1; }
+.prompt-label { color:var(--amber); font:700 10px ui-monospace,monospace; letter-spacing:.12em; text-transform:uppercase; }
+.audience p { position:relative; z-index:1; margin:6px 0 0; max-width:310px; color:#e5d6bb; font-size:13px; line-height:1.42; font-weight:600; }
+.controls { display:flex; justify-content:space-between; align-items:center; gap:18px; padding:12px 3px 1px; }
+.controls-left, .controls-right { display:flex; align-items:center; gap:9px; }
+.control-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:36px; padding:0 13px; border:1px solid var(--line); border-radius:9px; color:#c8d7ea; background:#132139; font-size:12px; font-weight:650; cursor:pointer; transition:background .2s,border-color .2s,transform .2s; }
+.control-btn:hover:not(:disabled) { background:#1b304e; border-color:#55708e; transform:translateY(-1px); }
+.control-btn:disabled { opacity:.4; cursor:not-allowed; }
+.control-btn.primary { color:#071725; background:var(--cyan); border-color:var(--cyan); }
+.control-btn.primary:hover:not(:disabled) { background:#81e6f7; border-color:#81e6f7; }
+.control-btn.icon { min-width:37px; padding:0 10px; }
+.key-hint { color:#7489a3; font:10px ui-monospace,monospace; white-space:nowrap; }
+.progress-wrap { display:flex; align-items:center; gap:10px; flex:1; max-width:270px; }
+.progress-label { color:#8ca1bb; font:10px ui-monospace,monospace; white-space:nowrap; }
+.progress-track { position:relative; height:4px; flex:1; overflow:hidden; border-radius:9px; background:#273b55; }
+.progress-fill { height:100%; width:0; border-radius:9px; background:linear-gradient(90deg,var(--cyan),var(--mint)); transition:width .35s ease; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.motion-paused *, .motion-paused *::before, .motion-paused *::after { animation-play-state:paused !important; }
+@keyframes dash { to { stroke-dashoffset:-28; } }
+@keyframes travel { from { offset-distance:0%; } to { offset-distance:100%; } }
+@media (prefers-reduced-motion:reduce) {
+  *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell" id="talk">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">↗</span> Brighton Web Dev Meetup</div>
+    <div class="session-badge"><span class="badge-dot" aria-hidden="true"></span> TALK MAP · SIMULATED VISUAL · NO LIVE API</div>
+  </header>
+
+  <section class="intro" aria-labelledby="talk-title">
+    <div>
+      <div class="eyebrow">From public bike data to useful decisions</div>
+      <h1 id="talk-title">Who are these <em>AI Data Intelligence Agents?</em></h1>
+    </div>
+    <p class="intro-copy"><strong>Our route:</strong> start with Brighton's Beryl bike data, then build the agent idea around a real question—what could we know, and what should we let software do?</p>
+  </section>
+
+  <main class="layout">
+    <aside class="agenda" aria-label="Talk agenda">
+      <div class="agenda-heading"><h2>Suggested run of show</h2><span>~40 MIN</span></div>
+      <nav class="agenda-list" id="agendaList" aria-label="Choose a talk section"></nav>
+      <div class="agenda-foot"><b>Audience-first:</b> predict, challenge, then unpack the machinery. Each AI idea earns its place in the bike-data story.</div>
+    </aside>
+
+    <section class="presentation" aria-label="Interactive talk presentation">
+      <div class="scene" id="scene" aria-label="Animated diagram of the data and agent workflow">
+        <div class="scene-topline"><span class="scene-label">One journey · two loops</span><span class="scene-state"><i aria-hidden="true"></i><span id="sceneState">BIKE DATA</span></span></div>
+        <svg class="diagram" viewBox="0 0 1200 470" role="img" aria-labelledby="diagramTitle diagramDesc" preserveAspectRatio="xMidYMid meet">
+          <title id="diagramTitle">From Beryl bike feeds to an AI-assisted answer</title>
+          <desc id="diagramDesc">A data pipeline prepares bike-share snapshots. Separately, a harness gives a model tools; the model can request a local tool, receive its result, and answer. The model does not execute the tool itself.</desc>
+          <defs>
+            <marker id="arrowCyan" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#54d5f2"/></marker>
+            <marker id="arrowMuted" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#526985"/></marker>
+            <marker id="arrowMint" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#6ee7b7"/></marker>
+            <path id="routeToTool" d="M692 322 C760 322 800 322 860 322"/>
+            <path id="routeBack" d="M860 372 C800 410 760 410 692 372"/>
+          </defs>
+          <text x="55" y="91" class="lane-label">THE BIKE-DATA PIPELINE</text>
+          <path id="edgeFeed" class="flow" d="M230 163H318" marker-end="url(#arrowMuted)"/>
+          <path id="edgeEtl" class="flow" d="M497 163H585" marker-end="url(#arrowMuted)"/>
+          <path id="edgeAnalysis" class="flow" d="M764 163H852" marker-end="url(#arrowMuted)"/>
+          <g id="feedNode" class="">
+            <rect class="node" x="54" y="119" rx="15" width="176" height="88"/>
+            <text class="node-icon" x="73" y="151">◎</text><text class="node-cap" x="101" y="150">BERYL · GBFS</text>
+            <text class="node-sub" x="74" y="178">station status + info</text><text class="node-sub" x="74" y="194">~119 Brighton stations</text>
+          </g>
+          <g id="etlNode" class="">
+            <rect class="node" x="318" y="119" rx="15" width="179" height="88"/>
+            <text class="node-icon" x="337" y="151">⇄</text><text class="node-cap" x="366" y="150">PYTHON · ETL</text>
+            <text class="node-sub" x="338" y="178">extract · merge · derive</text><text class="node-sub" x="338" y="194">clean the shape, not truth</text>
+          </g>
+          <g id="snapshotNode" class="">
+            <rect class="node" x="585" y="119" rx="15" width="179" height="88"/>
+            <text class="node-icon" x="604" y="151">▤</text><text class="node-cap" x="633" y="150">SNAPSHOTS</text>
+            <text class="node-sub" x="605" y="178">timestamped CSV rows</text><text class="node-sub" x="605" y="194">one station per row</text>
+          </g>
+          <g id="insightNode" class="">
+            <rect class="node" x="852" y="119" rx="15" width="250" height="88"/>
+            <text class="node-icon" x="873" y="151">⌁</text><text class="node-cap" x="902" y="150">ANALYSIS / ANSWER</text>
+            <text class="node-sub" x="874" y="178">availability · change · forecasts</text><text class="node-sub" x="874" y="194">show evidence, not just confidence</text>
+          </g>
+          <circle class="packet" r="4"><animateMotion dur="3.4s" repeatCount="indefinite"><mpath href="#edgeFeed"/></animateMotion></circle>
+          <circle class="packet p2" r="4"><animateMotion dur="4.2s" repeatCount="indefinite"><mpath href="#edgeEtl"/></animateMotion></circle>
+
+          <text x="55" y="264" class="lane-label">THE AGENT LOOP · A SEPARATE SOFTWARE SYSTEM</text>
+          <path id="edgeGoal" class="flow" d="M230 351H318" marker-end="url(#arrowMuted)"/>
+          <path id="edgeDecision" class="flow" d="M497 351H570" marker-end="url(#arrowMuted)"/>
+          <path id="edgeTool" class="flow" d="M692 351H835" marker-end="url(#arrowMuted)"/>
+          <path id="edgeReturn" class="flow" d="M930 395 C850 447 650 447 497 394" marker-end="url(#arrowMuted)"/>
+          <path id="edgeFinal" class="flow" d="M692 322 C770 267 880 267 975 282" marker-end="url(#arrowMuted)"/>
+          <g id="harnessFrame" class="">
+            <rect class="harness-frame" x="301" y="286" rx="19" width="652" height="150"/>
+            <text class="harness-caption" x="321" y="307">THE HARNESS · PROMPT + TOOL SCHEMAS + LOOP + LIMITS</text>
+          </g>
+          <g id="goalNode" class="">
+            <rect class="node" x="54" y="318" rx="14" width="176" height="68"/>
+            <text class="node-cap" x="74" y="347">YOUR QUESTION</text><text class="node-sub" x="74" y="367">“Where might bikes run out?”</text>
+          </g>
+          <g id="modelNode" class="model-node">
+            <rect class="node" x="318" y="322" rx="14" width="179" height="66"/>
+            <text class="node-icon" x="337" y="350">✳</text><text class="node-cap" x="365" y="349">LANGUAGE MODEL</text>
+            <text class="node-sub" x="338" y="372">reasons · requests · responds</text>
+          </g>
+          <g id="decisionNode" class="">
+            <path class="decision" d="M631 312L692 351L631 390L570 351Z"/>
+            <text x="631" y="347" text-anchor="middle" fill="#e1d9ff" font-size="10" font-weight="700">NEXT?</text>
+            <text x="631" y="363" text-anchor="middle" fill="#aa9bd3" font-size="9">tool / answer</text>
+          </g>
+          <g id="toolNode" class="">
+            <rect class="node" x="835" y="318" rx="14" width="178" height="70"/>
+            <text class="node-icon" x="852" y="350">⌘</text><text class="node-cap" x="880" y="349">LOCAL TOOL</text>
+            <text class="node-sub" x="853" y="372">Python executes; result returns</text>
+          </g>
+          <g id="humanNode" class="">
+            <rect class="node" x="1019" y="318" rx="14" width="133" height="70"/>
+            <text class="node-cap" x="1037" y="349">HUMAN CHECK</text><text class="node-sub" x="1037" y="372">evidence → action</text>
+          </g>
+          <text x="727" y="293" fill="#80b8ca" font-size="9">tool request</text>
+          <text x="685" y="429" fill="#82cdae" font-size="9">tool result → model</text>
+          <text x="978" y="265" fill="#80b8ca" font-size="9">final response</text>
+          <circle class="packet" r="4"><animateMotion dur="2.6s" repeatCount="indefinite"><mpath href="#routeToTool"/></animateMotion></circle>
+          <circle class="packet p2"><animateMotion dur="2.8s" repeatCount="indefinite"><mpath href="#routeBack"/></animateMotion></circle>
+          <text x="55" y="455" fill="#6f849e" font-size="9">Illustrative architecture—not a live AI integration. A tool is code the harness runs, not code the model executes.</text>
+        </svg>
+      </div>
+
+      <div>
+        <div class="caption-row">
+          <article class="explain" aria-live="polite" aria-atomic="true">
+            <div class="step-kicker" id="stepKicker"></div>
+            <h2 id="stepTitle"></h2>
+            <p id="stepBody"></p>
+            <div class="takeaway" id="stepTakeaway"></div>
+          </article>
+          <aside class="audience" aria-live="polite" aria-atomic="true">
+            <div class="prompt-label">Ask the room</div>
+            <p id="stepPrompt"></p>
+          </aside>
+        </div>
+        <div class="controls">
+          <div class="controls-left">
+            <button class="control-btn" id="prevBtn" type="button" aria-label="Previous section">← <span>Back</span></button>
+            <button class="control-btn primary" id="nextBtn" type="button"><span>Next section</span> <span aria-hidden="true">→</span></button>
+          </div>
+          <div class="progress-wrap" aria-label="Talk progress"><span class="progress-label" id="progressLabel">01 / 07</span><div class="progress-track"><div class="progress-fill" id="progressFill"></div></div></div>
+          <div class="controls-right">
+            <span class="key-hint">← → to navigate</span>
+            <button class="control-btn icon" id="motionBtn" type="button" aria-pressed="false" aria-label="Pause animation" title="Pause animation">Ⅱ</button>
+            <button class="control-btn icon" id="replayBtn" type="button" aria-label="Replay visual animation" title="Replay visual animation">↻</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div class="sr-only" id="liveAnnounce" aria-live="polite"></div>
+</div>
+<script>
+(() => {
+  const steps = [
+    {
+      time: '00–04', name: 'Start with a bike', category: 'OPEN · HUMAN QUESTION', state: 'START WITH THE QUESTION',
+      title: 'A bike question before an AI answer',
+      body: 'Put the Brighton network on screen. Beryl publishes public GBFS feeds; today we care about one useful question: where could a rider struggle to find a bike?',
+      takeaway: 'The data problem comes first. The model is not the story yet.',
+      prompt: 'Which station or journey would you want this data to help you with?',
+      focus: ['feedNode','goalNode'], hot: ['edgeFeed','edgeGoal'], tint: 'active-cyan'
+    },
+    {
+      time: '04–10', name: 'Meet the dataset', category: 'ACT 1 · DATA + ETL', state: 'BIKE DATA → ETL',
+      title: 'Two feeds, one usable snapshot',
+      body: 'Station status gives current bikes and docks; station information adds names, locations and capacity. Python merges them, derives utilisation, and can save timestamped station rows for later comparison.',
+      takeaway: 'A small data wrinkle: station_id arrives as a number in one feed and text in another.',
+      prompt: 'What could go wrong if two columns look the same to us but have different types?',
+      focus: ['feedNode','etlNode','snapshotNode'], hot: ['edgeFeed','edgeEtl'], tint: 'active-mint'
+    },
+    {
+      time: '10–16', name: 'Find a signal', category: 'ACT 2 · ANALYSIS', state: 'SNAPSHOTS → SIGNAL',
+      title: 'One snapshot is a picture; many are a story',
+      body: 'The dashboard can count bikes, find empty stations and compare consecutive snapshots. With a growing time series, we can test a baseline forecast: assume the near future resembles the current state, then improve it.',
+      takeaway: 'First ask what the evidence can support—not what sounds clever.',
+      prompt: 'Would you trust “this station may empty soon” from one snapshot? What else would you ask for?',
+      focus: ['snapshotNode','insightNode','humanNode'], hot: ['edgeAnalysis','edgeFinal'], tint: 'active-amber'
+    },
+    {
+      time: '16–22', name: 'Meet the agent', category: 'ACT 3 · THE MODEL', state: 'A MODEL CAN CHOOSE A TOOL',
+      title: 'An agent is more than a chat box',
+      body: 'A language model can interpret a goal and request a tool when it needs evidence. If the model can only answer from its prompt, it is a chat interaction; if software runs a controlled tool-and-result loop, we have the beginnings of an agent.',
+      takeaway: 'The model proposes a tool call; it does not execute Python itself.',
+      prompt: 'For “which stations may run out?”, what would the model need to look up instead of guess?',
+      focus: ['goalNode','modelNode','decisionNode','toolNode'], hot: ['edgeGoal','edgeDecision','edgeTool'], tint: 'active-purple'
+    },
+    {
+      time: '22–29', name: 'Meet the harness', category: 'ACT 4 · THE HARNESS', state: 'THE HARNESS SETS THE RULES',
+      title: 'The harness is the working system around the model',
+      body: 'It supplies the instructions and tool descriptions, decides which calls are allowed, runs approved code, returns results, keeps state, logs what happened and stops the loop at a limit. The model is one component—not the whole agent.',
+      takeaway: 'Good harnesses make capability observable, bounded and testable.',
+      prompt: 'What should the harness refuse or require a human to confirm?',
+      focus: ['harnessFrame','modelNode','decisionNode','toolNode'], hot: ['edgeDecision','edgeTool','edgeReturn'], tint: 'active-purple'
+    },
+    {
+      time: '29–35', name: 'Trace one tool call', category: 'ACT 5 · TABLETOP DEMO', state: 'REQUEST → LOCAL TOOL → RESULT',
+      title: 'Rehearse the bike-data agent loop',
+      body: 'Goal: flag stations at risk of going empty. The model asks for a station-risk summary; the harness validates the request and runs a local analysis function on prepared snapshots; the result returns to the model for a cited, cautious explanation.',
+      takeaway: 'The tool output is evidence to inspect—not an instruction to obey blindly.',
+      prompt: 'What checks belong inside the tool before its result reaches the model?',
+      focus: ['feedNode','etlNode','snapshotNode','harnessFrame','modelNode','decisionNode','toolNode','insightNode'], hot: ['edgeFeed','edgeEtl','edgeAnalysis','edgeDecision','edgeTool','edgeReturn'], tint: 'active-mint'
+    },
+    {
+      time: '35–40', name: 'Trust, then build', category: 'CLOSE · AUDIENCE CHALLENGE', state: 'HUMAN JUDGMENT STAYS IN THE LOOP',
+      title: 'Useful intelligence needs a human boundary',
+      body: 'Compare the answer with timestamps, missing data and the baseline. Ask whether the feed is fresh, the station is truly at risk, and what action is safe. Then invite the room to sketch one narrow agent: one job, a few tools, explicit limits.',
+      takeaway: 'Data → question → model → harness → tool result → human decision.',
+      prompt: 'Design the smallest safe bike-data agent: what is its one job, one tool, and stop rule?',
+      focus: ['feedNode','etlNode','snapshotNode','insightNode','harnessFrame','modelNode','decisionNode','toolNode','humanNode'], hot: ['edgeFeed','edgeEtl','edgeAnalysis','edgeGoal','edgeDecision','edgeTool','edgeReturn','edgeFinal'], tint: 'active-cyan'
+    }
+  ];
+  const nodeIds = ['feedNode','etlNode','snapshotNode','insightNode','goalNode','harnessFrame','modelNode','decisionNode','toolNode','humanNode'];
+  const edgeIds = ['edgeFeed','edgeEtl','edgeAnalysis','edgeGoal','edgeDecision','edgeTool','edgeReturn','edgeFinal'];
+  const agenda = document.getElementById('agendaList');
+  const scene = document.getElementById('scene');
+  let current = 0;
+  let motionPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  steps.forEach((step, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'agenda-item';
+    button.dataset.index = index;
+    button.setAttribute('aria-label', `${index + 1}. ${step.name}, ${step.time} minutes`);
+    button.innerHTML = `<span class="agenda-num">${String(index + 1).padStart(2, '0')}</span><span class="agenda-name">${step.name}</span><span class="agenda-time">${step.time}</span>`;
+    button.addEventListener('click', () => render(index));
+    agenda.appendChild(button);
+  });
+
+  function render(index) {
+    current = Math.max(0, Math.min(steps.length - 1, index));
+    const step = steps[current];
+    document.getElementById('stepKicker').textContent = `${String(current + 1).padStart(2, '0')} / ${String(steps.length).padStart(2, '0')}  ·  ${step.category}`;
+    document.getElementById('stepTitle').textContent = step.title;
+    document.getElementById('stepBody').textContent = step.body;
+    document.getElementById('stepTakeaway').innerHTML = `<span aria-hidden="true">↳</span>${step.takeaway}`;
+    document.getElementById('stepPrompt').textContent = step.prompt;
+    document.getElementById('sceneState').textContent = step.state;
+    document.getElementById('progressLabel').textContent = `${String(current + 1).padStart(2, '0')} / ${String(steps.length).padStart(2, '0')}`;
+    document.getElementById('progressFill').style.width = `${((current + 1) / steps.length) * 100}%`;
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === steps.length - 1;
+    document.getElementById('nextBtn').innerHTML = current === steps.length - 1 ? '<span>End of talk</span> <span aria-hidden="true">✓</span>' : '<span>Next section</span> <span aria-hidden="true">→</span>';
+    document.querySelectorAll('.agenda-item').forEach((item, itemIndex) => {
+      if (itemIndex === current) item.setAttribute('aria-current', 'step');
+      else item.removeAttribute('aria-current');
+    });
+    nodeIds.forEach(id => {
+      const node = document.getElementById(id);
+      node.classList.remove('active-cyan','active-mint','active-amber','active-purple');
+    });
+    edgeIds.forEach(id => document.getElementById(id).classList.remove('flow-hot'));
+    step.focus.forEach(id => document.getElementById(id).classList.add(step.tint));
+    step.hot.forEach(id => document.getElementById(id).classList.add('flow-hot'));
+    document.getElementById('liveAnnounce').textContent = `Section ${current + 1} of ${steps.length}: ${step.name}. ${step.prompt}`;
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => render(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => render(current + 1));
+  document.getElementById('motionBtn').addEventListener('click', event => {
+    motionPaused = !motionPaused;
+    document.body.classList.toggle('motion-paused', motionPaused);
+    event.currentTarget.setAttribute('aria-pressed', String(motionPaused));
+    event.currentTarget.setAttribute('aria-label', motionPaused ? 'Resume animation' : 'Pause animation');
+    event.currentTarget.title = motionPaused ? 'Resume animation' : 'Pause animation';
+    event.currentTarget.textContent = motionPaused ? '▶' : 'Ⅱ';
+  });
+  document.getElementById('replayBtn').addEventListener('click', () => {
+    document.querySelectorAll('.packet, .flow-hot').forEach(el => {
+      el.style.animation = 'none';
+      void el.getBoundingClientRect();
+      el.style.animation = '';
+    });
+  });
+  document.addEventListener('keydown', event => {
+    if (event.altKey || event.ctrlKey || event.metaKey || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+    if (event.key === 'ArrowRight') { event.preventDefault(); render(current + 1); }
+    if (event.key === 'ArrowLeft') { event.preventDefault(); render(current - 1); }
+  });
+  if (motionPaused) document.body.classList.add('motion-paused');
+  if (motionPaused) {
+    const btn = document.getElementById('motionBtn');
+    btn.textContent = '▶'; btn.setAttribute('aria-pressed','true'); btn.setAttribute('aria-label','Resume animation'); btn.title = 'Resume animation';
+  }
+  render(0);
+})();
+</script>
+</body>
+</html>
