@@ -1,0 +1,142 @@
+# book_theme.toml - the look of the generated book page
+#
+# build_book.py reads this file and turns every value below into a CSS custom
+# property in the page. Delete a line (or the whole file) and that value falls
+# back to the built-in default, which is the value shown here.
+#
+#   uv run --with markdown python scripts/build_book.py \
+#       --src EXPLAINER.md --out book.html --theme book_theme.toml
+#
+# There is also a live panel: open the page, click the "Aa" button, drag the
+# sliders, then "Copy TOML" to paste the result back over this file.
+#
+# Sizes are multipliers of two bases (fs_content for the reading column, fs_ui
+# for the sidebar and chrome), so one edit rescales the page coherently.
+
+# Optional Google Fonts stylesheet for the families named in [fonts].
+# Set to "" to ship no external request at all (system stacks only).
+webfont_url = "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap"
+
+# auto follows the operating system. It is also the panel's starting mode.
+# auto follows the operating system. It is also the panel's starting mode.
+mode = "auto"
+
+
+# --------------------------------------------------------------------------
+# type
+# --------------------------------------------------------------------------
+[type]
+fs_content = 34          # book text, px          (18-90)
+lh_content = 1.62        # book line height       (1.0-2.6)
+fs_ui = 17               # sidebar / chrome text, px (10-30)
+lh_ui = 1.62             # chrome line height     (1.0-2.6)
+
+# Every other size is a multiplier of one of the two bases above, so changing
+# fs_content or fs_ui rescales the whole page consistently.
+[type.scale]
+# relative to fs_content (the reading column)
+h2 = 1.765               # chapter titles
+h3 = 1.118               # section titles
+h4 = 0.882               # sub-sub headings
+table = 0.824            # tables
+pre = 0.588              # code blocks (kept small so ASCII diagrams fit)
+details = 0.882          # answers inside <details>
+chnav = 0.794            # previous / next chapter strip
+mobile = 0.765           # content size on narrow screens
+# relative to fs_ui (sidebar + chrome)
+eyebrow = 0.824          # the small caps line above the title
+brand_h1 = 1.618         # book title in the sidebar
+brand_p = 0.912          # subtitle under it
+filter = 0.941           # the contents filter box
+section = 0.912          # section links, panel labels
+foot = 0.853             # sidebar footer
+copy = 0.647             # "Copy" button on code blocks
+menu = 0.765             # mobile ☰ button
+
+
+# --------------------------------------------------------------------------
+# layout
+# --------------------------------------------------------------------------
+[layout]
+sidebar = 400            # sidebar width, px      (240-560)
+measure = 80             # reading column, % of the pane (40-100)
+
+
+# --------------------------------------------------------------------------
+# fonts - any CSS font stack; the first installed family wins
+# --------------------------------------------------------------------------
+[fonts]
+serif = '"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif'
+sans = '-apple-system, "Segoe UI", Inter, Helvetica, Arial, sans-serif'
+mono = '"JetBrains Mono", "Cascadia Mono", Consolas, ui-monospace, monospace'
+
+
+# --------------------------------------------------------------------------
+# colours (light)
+# --------------------------------------------------------------------------
+[colors]
+paper = "#f0eee6"           # page background
+surface = "#fbfaf7"         # sidebar background
+ivory = "#fffdfa"           # cards, inputs, chapter nav
+ink = "#1f1e1d"             # body text
+muted = "#55524c"           # secondary text
+stone = "#8c877c"           # faint labels
+line = "#e2ddd2"            # borders
+line_soft = "#ece8df"       # hairlines
+terra = "#d97757"           # accent bar, active marker
+terra_dark = "#c9633f"      # links and accent text
+accent_strong = "#a14e2f"   # eyebrow, active section label
+hover_bg = "#f4f1e9"        # hover background
+active_bg = "#f6ede6"       # highlighted contents entry
+active_fg = "#8f3f27"       # its text
+focus_ring = "#e3a98f"      # keyboard focus outline
+code_bg = "#23211e"         # code block background
+code_fg = "#f3eee5"         # code block text
+inline_code_bg = "#eae7de"  # `inline code` background
+inline_code_fg = "#6f3b26"  # `inline code` text
+quote_bg = "#f8eee8"        # "you are here" callout
+quote_border = "#e7cec2"    # callout border
+quote_fg = "#3d3d3a"        # callout text
+row_hover = "#f7f4ee"       # table row hover
+open_bg = "#fdf9f5"         # opened answer
+scroll_thumb = "#4a463f"    # code block scrollbar
+copy_bg = "#2c2a26"         # copy button
+copy_fg = "#d8d2c6"
+copy_border = "#4a463f"
+copy_hover = "#3a3732"
+
+
+# --------------------------------------------------------------------------
+# colours (dark) - same keys. Used when mode = "dark", or for "auto" when the
+# operating system is in dark mode.
+# --------------------------------------------------------------------------
+[dark]
+paper = "#1b1a18"
+surface = "#201f1c"
+ivory = "#262420"
+ink = "#f2ece1"
+muted = "#c3bcae"
+stone = "#9a9384"
+line = "#34312b"
+line_soft = "#2b2823"
+terra = "#d97757"
+terra_dark = "#d97757"
+accent_strong = "#f0b49a"
+hover_bg = "#262420"
+active_bg = "#33261f"
+active_fg = "#f0b49a"
+focus_ring = "#8a5540"
+code_bg = "#141312"
+code_fg = "#f3eee5"
+inline_code_bg = "#322e28"
+inline_code_fg = "#f0b49a"
+quote_bg = "#2a211d"
+quote_border = "#4a332b"
+quote_fg = "#e6ded2"
+row_hover = "#262420"
+open_bg = "#262420"
+scroll_thumb = "#4a463f"
+copy_bg = "#2c2a26"
+copy_fg = "#d8d2c6"
+copy_border = "#4a463f"
+copy_hover = "#3a3732"

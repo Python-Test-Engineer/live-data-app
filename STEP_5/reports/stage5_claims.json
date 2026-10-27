@@ -1,0 +1,104 @@
+{
+  "claims": [
+    {
+      "text": "50.8% of rows report exactly 4 free docks, and 46 stations never report anything else.",
+      "evidence_ids": [
+        "ev_001"
+      ],
+      "action": {
+        "owner": "data / product",
+        "what": "replace docks == 0 with docks <= 4 AND occupancy >= 0.75",
+        "when": "next release"
+      },
+      "impact": "a FULL alert that can actually fire",
+      "confidence": "high",
+      "limits": [
+        "occupancy still relies on a soft capacity field"
+      ],
+      "falsifier": "a future snapshot with num_docks_available == 0"
+    },
+    {
+      "text": "1 observation time appears in more than one file; the panel keeps 7 snapshots from 8 files.",
+      "evidence_ids": [
+        "ev_001"
+      ],
+      "action": {
+        "owner": "data engineering",
+        "what": "deduplicate on last_reported before any rate calculation",
+        "when": "now"
+      },
+      "impact": "removes a doubled fleet and empty count at that moment",
+      "confidence": "high",
+      "limits": [
+        "only catches exact observation-time duplicates"
+      ],
+      "falsifier": "two different snapshots share a last_reported value"
+    },
+    {
+      "text": "The fastest drain loses 3.27 bikes per hour (Lewes Road & Edinburgh Road); the fastest sink gains 5.08 per hour (Richmond Place).",
+      "evidence_ids": [
+        "ev_002"
+      ],
+      "action": {
+        "owner": "operations",
+        "what": "pre-stock the drain stations and use the sink stations as sources",
+        "when": "before 07:00"
+      },
+      "impact": "reduces the morning lock-out window",
+      "confidence": "medium",
+      "limits": [
+        "2.75 h, one weekday",
+        "one 134-minute collection gap"
+      ],
+      "falsifier": "the same stations still drain after a full week of data"
+    },
+    {
+      "text": "Moving 20 bikes in 7 moves restores at least one bike to 7 stations.",
+      "evidence_ids": [
+        "ev_004"
+      ],
+      "action": {
+        "owner": "operations",
+        "what": "run the nearest-source rebalance plan",
+        "when": "before the next weekday peak"
+      },
+      "impact": "7 stations helped over 3.26 km",
+      "confidence": "medium",
+      "limits": [
+        "greedy matching, not optimal transport",
+        "no van capacity or traffic"
+      ],
+      "falsifier": "helped stations are still empty two hours after the move"
+    },
+    {
+      "text": "42 stations will be empty by noon.",
+      "evidence_ids": [
+        "ev_003"
+      ],
+      "action": {
+        "owner": "nobody",
+        "what": "do not publish this",
+        "when": "never"
+      },
+      "impact": "unsupported",
+      "confidence": "none",
+      "limits": [
+        "invented number"
+      ],
+      "falsifier": "the number is not in the evidence"
+    }
+  ],
+  "report": {
+    "path": "C:\\Users\\mrcra\\Desktop\\live-data-app\\STEP_5\\reports\\INSIGHTS.md",
+    "written": 4,
+    "rejected": [
+      {
+        "text": "42 stations will be empty by noon.",
+        "explanation": "unsupported: 42",
+        "evidence_ids": [
+          "ev_003"
+        ]
+      }
+    ]
+  }
+}

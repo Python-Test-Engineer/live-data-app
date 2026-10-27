@@ -1,0 +1,328 @@
+{
+  "snapshots": {
+    "files": [
+      {
+        "source_file": "DEMO_DATA_20261013_073002.csv",
+        "snapshot_ts": "2026-10-13T06:24:36+00:00",
+        "collected_utc": "2026-10-13T06:30:02+00:00",
+        "lag_min": 5.4,
+        "rows": 119,
+        "bikes": 761,
+        "docks": 822,
+        "capacity": 1482,
+        "empty": 10,
+        "full": 13,
+        "not_renting": 4,
+        "residual_range": [
+          -6,
+          14
+        ],
+        "chosen": true,
+        "duplicate_observation": false
+      },
+      {
+        "source_file": "DEMO_DATA_20261013_074320.csv",
+        "snapshot_ts": "2026-10-13T06:34:29+00:00",
+        "collected_utc": "2026-10-13T06:43:20+00:00",
+        "lag_min": 8.8,
+        "rows": 119,
+        "bikes": 762,
+        "docks": 822,
+        "capacity": 1482,
+        "empty": 10,
+        "full": 16,
+        "not_renting": 4,
+        "residual_range": [
+          -6,
+          14
+        ],
+        "chosen": false,
+        "duplicate_observation": false
+      },
+      {
+        "source_file": "DEMO_DATA_20261013_074336.csv",
+        "snapshot_ts": "2026-10-13T06:34:29+00:00",
+        "collected_utc": "2026-10-13T06:43:36+00:00",
+        "lag_min": 9.1,
+        "rows": 119,
+        "bikes": 762,
+        "docks": 822,
+        "capacity": 1482,
+        "empty": 10,
+        "full": 16,
+        "not_renting": 4,
+        "residual_range": [
+          -6,
+          14
+        ],
+        "chosen": true,
+        "duplicate_observation": true
+      },
+      {
+        "source_file": "DEMO_DATA_20261013_074752.csv",
+        "snapshot_ts": "2026-10-13T06:39:38+00:00",
+        "collected_utc": "2026-10-13T06:47:52+00:00",
+        "lag_min": 8.2,
+        "rows": 119,
+        "bikes": 762,
+        "docks": 824,
+        "capacity": 1482,
+        "empty": 10,
+        "full": 15,
+        "not_renting": 4,
+        "residual_range": [
+          -6,
+          14
+        ],
+        "chosen": true,
+        "duplicate_observation": false
+      },
+      {
+        "source_file": "DEMO_DATA_20261013_100407.csv",
+        "snapshot_ts": "2026-10-13T08:53:52+00:00",
+        "collected_utc": "2026-10-13T09:04:07+00:00",
+        "lag_min": 10.2,
+        "rows": 119,
+        "bikes": 751,
+        "docks": 826,
+        "capacity": 1482,
+        "empty": 14,
+        "full": 17,
+        "not_renting": 4,
+        "residual_range": [
+          -10,
+          14
+        ],
+        "chosen": true,
+        "duplicate_observation": false
+      },
+      {
+        "source_file": "DEMO_DATA_20261013_100605.csv",
+        "snapshot_ts": "2026-10-13T08:58:55+00:00",
+        "collected_utc": "2026-10-13T09:06:05+00:00",
+        "lag_min": 7.2,
+        "rows": 119,
+        "bikes": 753,
+        "docks": 821,
+        "capacity": 1482,
+        "empty": 14,
+        "full": 18,
+        "not_renting": 4,
+        "residual_range": [
+          -10,
+          14
+        ],
+        "chosen": true,
+        "duplicate_observation": false
+      },
+      {
+        "source_file": "DEMO_DATA_20261013_101305.csv",
+        "snapshot_ts": "2026-10-13T09:04:49+00:00",
+        "collected_utc": "2026-10-13T09:13:05+00:00",
+        "lag_min": 8.3,
+        "rows": 119,
+        "bikes": 752,
+        "docks": 822,
+        "capacity": 1482,
+        "empty": 14,
+        "full": 17,
+        "not_renting": 4,
+        "residual_range": [
+          -10,
+          14
+        ],
+        "chosen": true,
+        "duplicate_observation": false
+      },
+      {
+        "source_file": "DEMO_DATA_20261013_101905.csv",
+        "snapshot_ts": "2026-10-13T09:09:47+00:00",
+        "collected_utc": "2026-10-13T09:19:05+00:00",
+        "lag_min": 9.3,
+        "rows": 119,
+        "bikes": 760,
+        "docks": 819,
+        "capacity": 1482,
+        "empty": 14,
+        "full": 17,
+        "not_renting": 4,
+        "residual_range": [
+          -10,
+          14
+        ],
+        "chosen": true,
+        "duplicate_observation": false
+      }
+    ],
+    "n_files": 8,
+    "n_unique_observations": 7
+  },
+  "audit": {
+    "findings": [
+      {
+        "id": "A1",
+        "severity": "high",
+        "finding": "num_docks_available is exactly 4 in 50.8% of rows and 46 of 119 stations never report anything else; docks == 0 occurs 0 times.",
+        "consequence": "A 'full station' alert written as docks == 0 would never fire. The field looks like a reporting floor, not a dock count.",
+        "fix": "Define FULL as docks <= 4 AND observed occupancy >= 75%. Report the floor to the feed provider."
+      },
+      {
+        "id": "A2",
+        "severity": "high",
+        "finding": "bikes + docks - capacity ranges -10..14; 94 rows have more bikes than capacity.",
+        "consequence": "Capacity is soft (virtual/overflow bays). fill_ratio = bikes/capacity can exceed 1.0, so it cannot be compared across stations without a caveat.",
+        "fix": "Use occupancy = bikes / (bikes + docks) and keep capacity only as a reference."
+      },
+      {
+        "id": "A3",
+        "severity": "medium",
+        "finding": "1 observation time(s) appear in more than one file; the files are identical. Example: DEMO_DATA_20261013_074336.csv / DEMO_DATA_20261013_074320.csv, DEMO_DATA_20261013_074336.csv.",
+        "consequence": "Keeping both doubles the fleet and the empty count at that moment and distorts any rate calculated from row counts.",
+        "fix": "Deduplicate on last_reported (the observation time), not the file name."
+      },
+      {
+        "id": "A4",
+        "severity": "medium",
+        "finding": "The gap between collection time (file stamp) and last_reported is 5.4-10.2 min (median 8.3).",
+        "consequence": "The feed is not real-time. A rider-facing 'available now' claim is already several minutes stale.",
+        "fix": "Show the lag; never mix file-stamp time with last_reported in the same series."
+      },
+      {
+        "id": "A5",
+        "severity": "high",
+        "finding": "4 station(s) report is_renting == False in every snapshot: King Alfred (6506), Portslade Station - North (7195), The Droveway - Waitrose (7197), London Rd / Ann Street (9648)",
+        "consequence": "Those stations cannot serve a trip for the whole window; they are outages, not demand signals.",
+        "fix": "Dispatch maintenance separately from rebalancing; do not count them as empty demand."
+      },
+      {
+        "id": "A6",
+        "severity": "medium",
+        "finding": "28 of 119 stations never change bike count; 1 collection gap(s) longer than 30 min.",
+        "consequence": "Some static stations are genuinely quiet; others may be frozen sensors. A gap makes 'what happened at 07:48' unanswerable.",
+        "fix": "Split static stations into idle vs stale using last_reported; mark gaps as no-data."
+      },
+      {
+        "id": "A7",
+        "severity": "info",
+        "finding": "The deduplicated panel has 7 snapshots over 2.8 h on a single day; empties moved 10 -> 14, fulls 13 -> 17.",
+        "consequence": "Enough for change detection and flow; not enough for a daily profile, seasonality or a trustworthy 60-minute forecast.",
+        "fix": "Keep the 5-minute collector running; gate forecasting on elapsed time and snapshots."
+      }
+    ],
+    "metrics": {
+      "n_files": 8,
+      "n_unique_snapshots": 7,
+      "n_stations": 119,
+      "n_rows": 833,
+      "duration_hours": 2.75,
+      "docks4_share": 0.5078,
+      "docks4_stations": 46,
+      "docks0_rows": 0,
+      "capacity_residual_min": -10,
+      "capacity_residual_max": 14,
+      "bikes_over_capacity_rows": 94,
+      "lag_min": 5.4,
+      "lag_median_min": 8.3,
+      "lag_max_min": 10.2,
+      "static_stations": 28,
+      "not_renting_stations": 4,
+      "not_renting": [
+        {
+          "station_id": 6506,
+          "name": "King Alfred",
+          "snapshots": 7
+        },
+        {
+          "station_id": 7195,
+          "name": "Portslade Station - North",
+          "snapshots": 7
+        },
+        {
+          "station_id": 7197,
+          "name": "The Droveway - Waitrose",
+          "snapshots": 7
+        },
+        {
+          "station_id": 9648,
+          "name": "London Rd / Ann Street",
+          "snapshots": 7
+        }
+      ],
+      "duplicate_observations": 1,
+      "gaps": [
+        {
+          "after": "2026-10-13T06:39:38+00:00",
+          "before": "2026-10-13T08:53:52+00:00",
+          "minutes": 134.2
+        }
+      ],
+      "last_bikes": 760,
+      "last_docks": 819,
+      "last_capacity": 1482,
+      "last_empty": 14,
+      "last_low": 22,
+      "last_full": 17
+    },
+    "recommended_definitions": {
+      "time": "last_reported (UTC epoch), not the file stamp",
+      "EMPTY": "num_bikes_available == 0",
+      "FULL": "num_docks_available <= 4 AND occupancy >= 0.75",
+      "occupancy": "bikes / (bikes + docks); do not trust capacity alone",
+      "dedupe": "one row per (last_reported, station_id)"
+    }
+  },
+  "metrics": {
+    "n_files": 8,
+    "n_unique_snapshots": 7,
+    "n_stations": 119,
+    "n_rows": 833,
+    "duration_hours": 2.75,
+    "docks4_share": 0.5078,
+    "docks4_stations": 46,
+    "docks0_rows": 0,
+    "capacity_residual_min": -10,
+    "capacity_residual_max": 14,
+    "bikes_over_capacity_rows": 94,
+    "lag_min": 5.4,
+    "lag_median_min": 8.3,
+    "lag_max_min": 10.2,
+    "static_stations": 28,
+    "not_renting_stations": 4,
+    "not_renting": [
+      {
+        "station_id": 6506,
+        "name": "King Alfred",
+        "snapshots": 7
+      },
+      {
+        "station_id": 7195,
+        "name": "Portslade Station - North",
+        "snapshots": 7
+      },
+      {
+        "station_id": 7197,
+        "name": "The Droveway - Waitrose",
+        "snapshots": 7
+      },
+      {
+        "station_id": 9648,
+        "name": "London Rd / Ann Street",
+        "snapshots": 7
+      }
+    ],
+    "duplicate_observations": 1,
+    "gaps": [
+      {
+        "after": "2026-10-13T06:39:38+00:00",
+        "before": "2026-10-13T08:53:52+00:00",
+        "minutes": 134.2
+      }
+    ],
+    "last_bikes": 760,
+    "last_docks": 819,
+    "last_capacity": 1482,
+    "last_empty": 14,
+    "last_low": 22,
+    "last_full": 17
+  }
+}

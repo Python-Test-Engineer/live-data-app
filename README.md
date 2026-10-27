@@ -70,3 +70,5 @@ per tick.)
 
 - **EXPLAINER.md** — how it works: data source, the ETL, the files, notes & pitfalls.
 - **REPORT.md** — qualitative analysis, forecasting plan, and conclusions.
+- **STEPS.md** — the six-folder live build ladder (`STEP_1` → `STEP_6`).
+- **TALK_PLAN.md** / **TALK_PLAN.html** — the full 60-minute talk run sheet.
