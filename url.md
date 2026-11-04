@@ -1,0 +1,1 @@
+https://gbfs.beryl.cc/v2_2/Brighton/gbfs.json
