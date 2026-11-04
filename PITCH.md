@@ -1,5 +1,7 @@
 Subject: Talk proposal: Building a Data Intelligence AI Agent = LIVE
 
+https://gbfs.beryl.cc/v2_2/Brighton/gbfs.json
+
 Hello Brighton Data Intelligence Network organisers,
 
 I'd like to propose a practical talk with a live demo: "Building a Data Intelligence AI Agent = LIVE".
