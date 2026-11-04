@@ -1,0 +1,25 @@
+{
+  "name": "make-html-dashboard",
+  "version": "1.0.0",
+  "kind": "base-template",
+  "description": "Self-contained dashboard shell sharing the make-html-from-md reading-guide template.",
+  "entry": "scripts/build_dashboard.mjs",
+  "payload": "data/dummy-data.json",
+  "preview": "examples/dashboard.html",
+  "features": [
+    "sticky numbered TOC with scroll-spy",
+    "reading progress bar",
+    "Aa appearance panel (light/dark/system, type, layout, fonts, colours)",
+    "KPI cards",
+    "inline SVG line chart",
+    "donut and bar breakdowns",
+    "utilisation histogram",
+    "station table and activity feed",
+    "optional chat launcher with 1.5x compact / 2x expanded type"
+  ],
+  "contracts": {
+    "shell_ids": ["toc", "bar", "stylebtn", "stylepanel"],
+    "chat_ids": ["chatbtn", "chatpanel", "chat-log", "chat-input", "chat-expand"],
+    "storage": ["mca-site-customiser:v2", "dashboard-chat-wide"]
+  }
+}

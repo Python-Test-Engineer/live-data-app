@@ -1,0 +1,999 @@
+{
+  "snapshot": "2026-11-04T04:57:33.955683+00:00",
+  "system": "Beryl",
+  "kpis": [
+    {
+      "label": "Total stations",
+      "value": "119",
+      "unit": "",
+      "tone": "default",
+      "hint": "115 renting · 4 unavailable"
+    },
+    {
+      "label": "Bikes available",
+      "value": "510",
+      "unit": "",
+      "tone": "good",
+      "hint": "270 e-bikes · 52.9% of fleet"
+    },
+    {
+      "label": "Free docks",
+      "value": "756",
+      "unit": "",
+      "tone": "default",
+      "hint": "1,496 total capacity"
+    },
+    {
+      "label": "Utilisation",
+      "value": "34.1",
+      "unit": "%",
+      "tone": "default",
+      "hint": "510 bikes / 1,496 capacity"
+    },
+    {
+      "label": "Empty stations",
+      "value": "20",
+      "unit": "",
+      "tone": "warn",
+      "hint": "16.8% of stations have no bikes"
+    },
+    {
+      "label": "Quality warnings",
+      "value": "3",
+      "unit": "",
+      "tone": "bad",
+      "hint": "Checks needing review; see Data quality"
+    }
+  ],
+  "station_profile": {
+    "title": "Station availability profile",
+    "sub": "119 stations · sorted by utilisation",
+    "labels": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "20",
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27",
+      "28",
+      "29",
+      "30",
+      "31",
+      "32",
+      "33",
+      "34",
+      "35",
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44",
+      "45",
+      "46",
+      "47",
+      "48",
+      "49",
+      "50",
+      "51",
+      "52",
+      "53",
+      "54",
+      "55",
+      "56",
+      "57",
+      "58",
+      "59",
+      "60",
+      "61",
+      "62",
+      "63",
+      "64",
+      "65",
+      "66",
+      "67",
+      "68",
+      "69",
+      "70",
+      "71",
+      "72",
+      "73",
+      "74",
+      "75",
+      "76",
+      "77",
+      "78",
+      "79",
+      "80",
+      "81",
+      "82",
+      "83",
+      "84",
+      "85",
+      "86",
+      "87",
+      "88",
+      "89",
+      "90",
+      "91",
+      "92",
+      "93",
+      "94",
+      "95",
+      "96",
+      "97",
+      "98",
+      "99",
+      "100",
+      "101",
+      "102",
+      "103",
+      "104",
+      "105",
+      "106",
+      "107",
+      "108",
+      "109",
+      "110",
+      "111",
+      "112",
+      "113",
+      "114",
+      "115",
+      "116",
+      "117",
+      "118",
+      "119"
+    ],
+    "series": [
+      {
+        "name": "Bikes",
+        "color": "#d97757",
+        "area": true,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          3,
+          3,
+          2,
+          2,
+          1,
+          1,
+          2,
+          2,
+          2,
+          6,
+          7,
+          3,
+          2,
+          2,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          6,
+          4,
+          4,
+          5,
+          15,
+          3,
+          3,
+          3,
+          4,
+          4,
+          13,
+          2,
+          2,
+          4,
+          7,
+          3,
+          6,
+          12,
+          4,
+          4,
+          8,
+          9,
+          9,
+          4,
+          5,
+          5,
+          5,
+          5,
+          12,
+          7,
+          6,
+          5,
+          5,
+          4,
+          4,
+          4,
+          4,
+          8,
+          6,
+          8,
+          5,
+          5,
+          5,
+          7,
+          4,
+          6,
+          8,
+          11,
+          6,
+          9,
+          4,
+          8,
+          7,
+          7,
+          7,
+          4,
+          5,
+          9,
+          11,
+          11,
+          13,
+          10,
+          18,
+          8,
+          14
+        ]
+      },
+      {
+        "name": "Free docks",
+        "color": "#6f9a6a",
+        "area": false,
+        "values": [
+          16,
+          15,
+          7,
+          6,
+          12,
+          6,
+          5,
+          10,
+          4,
+          5,
+          6,
+          4,
+          4,
+          8,
+          5,
+          5,
+          7,
+          5,
+          4,
+          4,
+          8,
+          10,
+          13,
+          4,
+          12,
+          9,
+          11,
+          8,
+          8,
+          9,
+          9,
+          6,
+          7,
+          12,
+          7,
+          9,
+          6,
+          4,
+          4,
+          8,
+          6,
+          7,
+          9,
+          13,
+          10,
+          5,
+          6,
+          9,
+          4,
+          6,
+          7,
+          6,
+          7,
+          4,
+          13,
+          7,
+          9,
+          11,
+          20,
+          6,
+          4,
+          6,
+          6,
+          7,
+          10,
+          4,
+          4,
+          4,
+          8,
+          4,
+          6,
+          13,
+          5,
+          4,
+          10,
+          11,
+          9,
+          4,
+          4,
+          5,
+          5,
+          5,
+          4,
+          4,
+          5,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          4,
+          5,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ]
+      }
+    ]
+  },
+  "vehicle_mix": [
+    {
+      "label": "Classic",
+      "value": 240,
+      "color": "#d97757"
+    },
+    {
+      "label": "E-bike",
+      "value": 270,
+      "color": "#6f9a6a"
+    }
+  ],
+  "zones": [
+    {
+      "label": "BTN_Phase_2",
+      "stations": 111,
+      "capacity": 1414,
+      "bikes": 460,
+      "docks": 715,
+      "empty": 20,
+      "offline": 4,
+      "utilisation_pct": 32.5,
+      "color": "#6f9a6a"
+    },
+    {
+      "label": "University of Sussex",
+      "stations": 2,
+      "capacity": 28,
+      "bikes": 19,
+      "docks": 8,
+      "empty": 0,
+      "offline": 0,
+      "utilisation_pct": 67.9,
+      "color": "#8c877c"
+    },
+    {
+      "label": "UoB - Moulsecoomb Campus",
+      "stations": 2,
+      "capacity": 27,
+      "bikes": 14,
+      "docks": 14,
+      "empty": 0,
+      "offline": 0,
+      "utilisation_pct": 51.9,
+      "color": "#5f8f8a"
+    },
+    {
+      "label": "UoB - Falmer Campus",
+      "stations": 2,
+      "capacity": 11,
+      "bikes": 12,
+      "docks": 8,
+      "empty": 0,
+      "offline": 0,
+      "utilisation_pct": 109.1,
+      "color": "#c9633f"
+    },
+    {
+      "label": "George Street",
+      "stations": 1,
+      "capacity": 11,
+      "bikes": 3,
+      "docks": 7,
+      "empty": 0,
+      "offline": 0,
+      "utilisation_pct": 27.3,
+      "color": "#b9862f"
+    },
+    {
+      "label": "A27 Slip Roads",
+      "stations": 1,
+      "capacity": 5,
+      "bikes": 2,
+      "docks": 4,
+      "empty": 0,
+      "offline": 0,
+      "utilisation_pct": 40.0,
+      "color": "#d97757"
+    }
+  ],
+  "utilisation_bands": [
+    {
+      "label": "0%",
+      "count": 20
+    },
+    {
+      "label": "1–25%",
+      "count": 30
+    },
+    {
+      "label": "26–50%",
+      "count": 33
+    },
+    {
+      "label": "51–75%",
+      "count": 21
+    },
+    {
+      "label": "76–100%",
+      "count": 11
+    },
+    {
+      "label": ">100%",
+      "count": 4
+    }
+  ],
+  "status_counts": [
+    {
+      "label": "balanced",
+      "count": 59
+    },
+    {
+      "label": "low",
+      "count": 25
+    },
+    {
+      "label": "empty",
+      "count": 16
+    },
+    {
+      "label": "busy",
+      "count": 15
+    },
+    {
+      "label": "offline",
+      "count": 4
+    }
+  ],
+  "top_stations": [
+    {
+      "name": "Preston Park / Preston Road",
+      "zone": "BTN_Phase_2",
+      "bikes": 18,
+      "docks": 4,
+      "capacity": 14,
+      "utilisation_pct": 128.6,
+      "status": "busy"
+    },
+    {
+      "name": "Hove Lawns",
+      "zone": "BTN_Phase_2",
+      "bikes": 15,
+      "docks": 20,
+      "capacity": 47,
+      "utilisation_pct": 31.9,
+      "status": "balanced"
+    },
+    {
+      "name": "Preston Circus",
+      "zone": "BTN_Phase_2",
+      "bikes": 14,
+      "docks": 4,
+      "capacity": 9,
+      "utilisation_pct": 155.6,
+      "status": "busy"
+    },
+    {
+      "name": "Moulsecoomb Way",
+      "zone": "BTN_Phase_2",
+      "bikes": 13,
+      "docks": 4,
+      "capacity": 13,
+      "utilisation_pct": 100.0,
+      "status": "busy"
+    },
+    {
+      "name": "Whitecross Street",
+      "zone": "BTN_Phase_2",
+      "bikes": 13,
+      "docks": 10,
+      "capacity": 35,
+      "utilisation_pct": 37.1,
+      "status": "balanced"
+    },
+    {
+      "name": "i360",
+      "zone": "BTN_Phase_2",
+      "bikes": 12,
+      "docks": 4,
+      "capacity": 24,
+      "utilisation_pct": 50.0,
+      "status": "balanced"
+    },
+    {
+      "name": "Brighton Marina",
+      "zone": "BTN_Phase_2",
+      "bikes": 12,
+      "docks": 13,
+      "capacity": 28,
+      "utilisation_pct": 42.9,
+      "status": "balanced"
+    },
+    {
+      "name": "Portland Road / Shelley Road",
+      "zone": "BTN_Phase_2",
+      "bikes": 11,
+      "docks": 4,
+      "capacity": 11,
+      "utilisation_pct": 100.0,
+      "status": "busy"
+    },
+    {
+      "name": "Saltdean Lido",
+      "zone": "BTN_Phase_2",
+      "bikes": 11,
+      "docks": 4,
+      "capacity": 11,
+      "utilisation_pct": 100.0,
+      "status": "busy"
+    },
+    {
+      "name": "University of Sussex - Sports Centre",
+      "zone": "University of Sussex",
+      "bikes": 11,
+      "docks": 4,
+      "capacity": 16,
+      "utilisation_pct": 68.8,
+      "status": "balanced"
+    },
+    {
+      "name": "New Church Road / Boundary Road",
+      "zone": "BTN_Phase_2",
+      "bikes": 10,
+      "docks": 4,
+      "capacity": 8,
+      "utilisation_pct": 125.0,
+      "status": "busy"
+    },
+    {
+      "name": "Portslade Station - South",
+      "zone": "BTN_Phase_2",
+      "bikes": 9,
+      "docks": 4,
+      "capacity": 9,
+      "utilisation_pct": 100.0,
+      "status": "busy"
+    },
+    {
+      "name": "Ladies' Mile Road",
+      "zone": "BTN_Phase_2",
+      "bikes": 9,
+      "docks": 4,
+      "capacity": 12,
+      "utilisation_pct": 75.0,
+      "status": "balanced"
+    },
+    {
+      "name": "Lewes Road & Elm Grove",
+      "zone": "BTN_Phase_2",
+      "bikes": 9,
+      "docks": 9,
+      "capacity": 19,
+      "utilisation_pct": 47.4,
+      "status": "balanced"
+    },
+    {
+      "name": "John Street",
+      "zone": "BTN_Phase_2",
+      "bikes": 9,
+      "docks": 11,
+      "capacity": 20,
+      "utilisation_pct": 45.0,
+      "status": "balanced"
+    }
+  ],
+  "outliers": {
+    "over_capacity": [
+      {
+        "station": "Preston Circus",
+        "zone": "BTN_Phase_2",
+        "bikes": 14,
+        "docks": 4,
+        "capacity": 9,
+        "utilisation_pct": 155.6
+      },
+      {
+        "station": "University of Brighton - Sports Centre",
+        "zone": "UoB - Falmer Campus",
+        "bikes": 8,
+        "docks": 4,
+        "capacity": 6,
+        "utilisation_pct": 133.3
+      },
+      {
+        "station": "Preston Park / Preston Road",
+        "zone": "BTN_Phase_2",
+        "bikes": 18,
+        "docks": 4,
+        "capacity": 14,
+        "utilisation_pct": 128.6
+      },
+      {
+        "station": "New Church Road / Boundary Road",
+        "zone": "BTN_Phase_2",
+        "bikes": 10,
+        "docks": 4,
+        "capacity": 8,
+        "utilisation_pct": 125.0
+      }
+    ],
+    "capacity_mismatch": [
+      {
+        "station": "Preston Circus",
+        "zone": "BTN_Phase_2",
+        "bikes": 14,
+        "docks": 4,
+        "capacity": 9,
+        "utilisation_pct": 155.6
+      },
+      {
+        "station": "Preston Park / Preston Road",
+        "zone": "BTN_Phase_2",
+        "bikes": 18,
+        "docks": 4,
+        "capacity": 14,
+        "utilisation_pct": 128.6
+      },
+      {
+        "station": "University of Brighton - Sports Centre",
+        "zone": "UoB - Falmer Campus",
+        "bikes": 8,
+        "docks": 4,
+        "capacity": 6,
+        "utilisation_pct": 133.3
+      },
+      {
+        "station": "New Church Road / Boundary Road",
+        "zone": "BTN_Phase_2",
+        "bikes": 10,
+        "docks": 4,
+        "capacity": 8,
+        "utilisation_pct": 125.0
+      },
+      {
+        "station": "Portland Road / Shelley Road",
+        "zone": "BTN_Phase_2",
+        "bikes": 11,
+        "docks": 4,
+        "capacity": 11,
+        "utilisation_pct": 100.0
+      },
+      {
+        "station": "Moulsecoomb Way",
+        "zone": "BTN_Phase_2",
+        "bikes": 13,
+        "docks": 4,
+        "capacity": 13,
+        "utilisation_pct": 100.0
+      },
+      {
+        "station": "Stanmer Park - One Garden",
+        "zone": "BTN_Phase_2",
+        "bikes": 4,
+        "docks": 4,
+        "capacity": 4,
+        "utilisation_pct": 100.0
+      },
+      {
+        "station": "Portslade Station - South",
+        "zone": "BTN_Phase_2",
+        "bikes": 9,
+        "docks": 4,
+        "capacity": 9,
+        "utilisation_pct": 100.0
+      },
+      {
+        "station": "Saltdean Lido",
+        "zone": "BTN_Phase_2",
+        "bikes": 11,
+        "docks": 4,
+        "capacity": 11,
+        "utilisation_pct": 100.0
+      },
+      {
+        "station": "Preston Barracks / Plus X Innovation",
+        "zone": "BTN_Phase_2",
+        "bikes": 5,
+        "docks": 4,
+        "capacity": 5,
+        "utilisation_pct": 100.0
+      }
+    ],
+    "empty": [
+      {
+        "station": "Hove Station - South",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 6,
+        "capacity": 29,
+        "utilisation_pct": 0.0
+      },
+      {
+        "station": "Brighton Palace Pier",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 7,
+        "capacity": 29,
+        "utilisation_pct": 0.0
+      },
+      {
+        "station": "Duke's Mound",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 6,
+        "capacity": 20,
+        "utilisation_pct": 0.0
+      },
+      {
+        "station": "Upper Gloucester Road / Surrey Street",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 16,
+        "capacity": 18,
+        "utilisation_pct": 0.0
+      },
+      {
+        "station": "King Alfred",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 15,
+        "capacity": 15,
+        "utilisation_pct": 0.0
+      },
+      {
+        "station": "Church Street",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 12,
+        "capacity": 13,
+        "utilisation_pct": 0.0
+      },
+      {
+        "station": "Marine Parade",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 4,
+        "capacity": 10,
+        "utilisation_pct": 0.0
+      },
+      {
+        "station": "The Droveway - Waitrose",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 10,
+        "capacity": 10,
+        "utilisation_pct": 0.0
+      },
+      {
+        "station": "Preston Park South",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 5,
+        "capacity": 10,
+        "utilisation_pct": 0.0
+      },
+      {
+        "station": "Lewes Road - Saunders Park",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 5,
+        "capacity": 10,
+        "utilisation_pct": 0.0
+      }
+    ],
+    "offline": [
+      {
+        "station": "King Alfred",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 15,
+        "capacity": 15,
+        "utilisation_pct": 0.0
+      },
+      {
+        "station": "Portslade Station - North",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 5,
+        "capacity": 5,
+        "utilisation_pct": 0.0
+      },
+      {
+        "station": "The Droveway - Waitrose",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 10,
+        "capacity": 10,
+        "utilisation_pct": 0.0
+      },
+      {
+        "station": "London Rd / Ann Street",
+        "zone": "BTN_Phase_2",
+        "bikes": 0,
+        "docks": 5,
+        "capacity": 5,
+        "utilisation_pct": 0.0
+      }
+    ]
+  },
+  "correlations": {
+    "capacity_vs_bikes": 0.271,
+    "capacity_vs_docks": 0.619,
+    "bikes_vs_docks": -0.062
+  },
+  "activity": [
+    {
+      "time": "ETL",
+      "text": "Snapshot loaded: <strong>119 stations</strong> from <code>data_20261104T045733Z.csv</code>",
+      "where": "extract + transform"
+    },
+    {
+      "time": "DQ",
+      "text": "<strong>capacity_matches_reported_docks</strong> — 82 stations where capacity != total_docks_reported",
+      "where": "quality check"
+    },
+    {
+      "time": "DQ",
+      "text": "<strong>utilisation_within_capacity</strong> — 4 stations report more bikes than capacity",
+      "where": "quality check"
+    },
+    {
+      "time": "DQ",
+      "text": "<strong>stations_available</strong> — 4 stations are not available",
+      "where": "quality check"
+    },
+    {
+      "time": "TOP",
+      "text": "<strong>Preston Park / Preston Road</strong> has 18 bikes and 4 free docks",
+      "where": "BTN_Phase_2 · 128.6%"
+    },
+    {
+      "time": "TOP",
+      "text": "<strong>Hove Lawns</strong> has 15 bikes and 20 free docks",
+      "where": "BTN_Phase_2 · 31.9%"
+    },
+    {
+      "time": "TOP",
+      "text": "<strong>Preston Circus</strong> has 14 bikes and 4 free docks",
+      "where": "BTN_Phase_2 · 155.6%"
+    },
+    {
+      "time": "TOP",
+      "text": "<strong>Moulsecoomb Way</strong> has 13 bikes and 4 free docks",
+      "where": "BTN_Phase_2 · 100.0%"
+    }
+  ],
+  "quality_notes": [
+    {
+      "title": "Capacity Matches Reported Docks",
+      "body": "82 stations where capacity != total_docks_reported"
+    },
+    {
+      "title": "Utilisation Within Capacity",
+      "body": "4 stations report more bikes than capacity"
+    },
+    {
+      "title": "Stations Available",
+      "body": "4 stations are not available"
+    },
+    {
+      "title": "Snapshot context",
+      "body": "Captured <code>2026-11-04T04:57:33.955683+00:00</code> from <code>Beryl</code>. Feed age <code>482s</code>."
+    }
+  ],
+  "insights": [
+    "Run the collector on a schedule to build a time series; this single snapshot cannot show change over time.",
+    "Rebalance the 20 empty stations before the next commute peak.",
+    "Check the 4 stations that are not available before publishing them as usable capacity.",
+    "Investigate 4 stations reporting more bikes than capacity; clamp or correct their source values.",
+    "Reconcile 82 capacity mismatches between <code>capacity</code> and <code>total_docks_reported</code>.",
+    "<strong>BTN_Phase_2</strong> holds the most bikes (460) at 32.5% utilisation."
+  ]
+}

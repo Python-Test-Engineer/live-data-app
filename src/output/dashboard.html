@@ -1,0 +1,2283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brighton Bikeshare · Live dashboard</title>
+<style>
+html{font-size:var(--root-size,24px)}
+
+:root{
+  --paper:#f0eee6; --surface:#fbfaf7; --ivory:#fffdfa; --ink:#1f1e1d;
+  --prose:#33302c; --muted:#55524c; --stone:#8c877c;
+  --line:#e0dbcf; --line-soft:#e9e4d8; --tint:#f6ede6;
+  --terra:#d97757; --terra-dark:#c9633f; --amber:#b9862f;
+  --code-bg:#23211e; --code-bar:#2b2823; --code-line:#3a3732;
+  --code-ink:#f2ece1; --code-dim:#a9a294; --code-accent:#f0b49a;
+  --sidebar:19.25rem; --measure:46rem;
+  --sans:-apple-system,'Segoe UI',Inter,Helvetica,Arial,sans-serif;
+  --serif:'Iowan Old Style',Palatino,'Palatino Linotype','Book Antiqua',Georgia,serif;
+  --mono:'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Consolas,monospace;
+}
+html[data-theme="dark"]{
+  --paper:#14171b; --surface:#1b1f24; --ivory:#232830; --ink:#eef2f6;
+  --prose:#c7d0d8; --muted:#9aa7b4; --stone:#7f8c99;
+  --line:#303944; --line-soft:#263039; --tint:#252f3b;
+  --terra:#e08a6a; --terra-dark:#eda07e; --amber:#d3a44a;
+  --code-bg:#111418; --code-bar:#181d22; --code-line:#2b343e;
+  --code-ink:#eef2f6; --code-dim:#8f9ba7; --code-accent:#f0b49a;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--prose);
+  font:1.03125rem/var(--lh-body,1.66) var(--sans);
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:#f0d3c6; color:#2a2622}
+html[data-theme="dark"] ::selection{background:#4a2f28; color:#f2ece1}
+
+/* ---------- shell ---------- */
+.shell{display:grid; grid-template-columns:var(--sidebar) minmax(0,1fr); align-items:start}
+.sidebar{
+  position:sticky; top:0; height:100vh; overflow-y:auto; overscroll-behavior:contain;
+  scrollbar-width:thin; scrollbar-color:#cec6b5 transparent;
+  padding:1.625rem 1.125rem 2.125rem 1.375rem;
+  border-right:0.0625rem solid var(--line);
+  background:linear-gradient(180deg,#f4f1e9,#efece3 60%,#ece8de);
+}
+html[data-theme="dark"] .sidebar{
+  scrollbar-color:#3a4652 transparent;
+  background:linear-gradient(180deg,#1d2228,#191e23 60%,#171b20);
+}
+.side-kicker{
+  display:block; margin:0 0 0.625rem; color:var(--terra-dark);
+  font:600 0.65625rem/1.3 var(--sans); letter-spacing:.14em; text-transform:uppercase; text-decoration:none;
+}
+.side-title{
+  margin:0; color:var(--ink); font:500 1.3125rem/1.2 var(--serif); letter-spacing:-.01em;
+}
+.side-sub{margin:0.375rem 0 0; color:var(--stone); font-size:0.7875rem; line-height:1.45}
+.side-rule{height:0.0625rem; margin:1.125rem 0 0.875rem; background:var(--line)}
+.side-label{
+  margin:0 0 0.375rem; color:var(--stone);
+  font:600 0.65625rem/1.3 var(--sans); letter-spacing:.13em; text-transform:uppercase;
+}
+.toc{display:flex; flex-direction:column; gap:0.0625rem}
+.toc a{
+  display:flex; gap:0.5625rem; align-items:baseline;
+  padding:0.375rem 0.5625rem 0.375rem 0.625rem; border-left:0.125rem solid transparent; border-radius:0 0.4375rem 0.4375rem 0;
+  color:var(--muted); font-size:0.8375rem; line-height:1.4; text-decoration:none;
+  transition:background .14s,color .14s,border-color .14s;
+}
+.toc a .n{color:#a9a294; font:0.6875rem/1 var(--mono); flex:0 0 1.125rem}
+.toc a:hover{background:#e8e3d6; color:var(--ink)}
+html[data-theme="dark"] .toc a .n{color:#7f8c99}
+html[data-theme="dark"] .toc a:hover{background:#252f3b}
+.toc a.active{background:var(--tint); border-left-color:var(--terra); color:var(--ink); font-weight:600}
+.toc a.active .n{color:var(--terra-dark)}
+.toc a.l3{padding-left:1.25rem; font-size:0.78rem}
+.toc a.l4{padding-left:1.85rem; font-size:0.73rem}
+.toc a.l3 .n,
+.toc a.l4 .n{display:none}
+html[data-theme="dark"] .toc a.l3:hover,
+html[data-theme="dark"] .toc a.l4:hover{background:#222930}
+.side-foot{
+  margin-top:1.25rem; padding-top:0.875rem; border-top:0.0625rem solid var(--line);
+  color:var(--stone); font-size:0.7375rem; line-height:1.6;
+}
+.side-foot code{font-size:0.6875rem}
+
+.progress{position:fixed; top:0; left:var(--sidebar); right:0; height:0.125rem; z-index:40; background:transparent}
+.progress span{display:block; height:100%; width:0; background:var(--terra); transition:width .1s linear}
+
+.sidebar::-webkit-scrollbar{width:0.4375rem}
+.sidebar::-webkit-scrollbar-thumb{background:#d5ccbb; border-radius:0.5rem}
+html[data-theme="dark"] .sidebar::-webkit-scrollbar-thumb{background:#3a4652}
+.sidebar::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- content pane ---------- */
+.pane{padding:3.25rem 3.5rem 8.75rem; min-width:0}
+.inner{max-width:var(--measure); margin:0 auto}
+
+.page-heading{margin:0 0 2.125rem; padding-bottom:1.75rem; border-bottom:0.0625rem solid var(--line)}
+.page-heading .eyebrow{
+  margin:0 0 0.75rem; color:var(--terra-dark);
+  font:600 0.6875rem/1.3 var(--sans); letter-spacing:.15em; text-transform:uppercase;
+}
+h1{
+  margin:0; color:var(--ink); font:500 clamp(2.125rem,4vw,2.875rem)/1.1 var(--serif); letter-spacing:-.02em;
+}
+.page-heading .lede{margin:0.875rem 0 0; color:var(--muted); font-size:1.09375rem; max-width:38rem}
+.meta{
+  margin:1.25rem 0 0; display:flex; flex-wrap:wrap; gap:0.25rem 0.6875rem;
+  color:var(--stone); font:0.7rem/1.6 var(--mono);
+}
+.meta span::before{content:"\00b7"; margin-right:0.6875rem; color:#c3bcae}
+html[data-theme="dark"] .meta span::before{color:#4a5560}
+.meta span:first-child::before{content:none; margin:0}
+
+section{padding-top:0.375rem; margin:0 0 2.75rem}
+section:first-of-type h2{margin-top:0}
+h2{
+  display:flex; gap:0.8125rem; align-items:baseline;
+  margin:2.375rem 0 0.875rem; color:var(--ink);
+  font:500 1.65625rem/1.22 var(--serif); letter-spacing:-.015em;
+  scroll-margin-top:1.625rem;
+}
+h2 .num{
+  flex:0 0 auto; color:var(--terra); padding-top:0.125rem;
+  font:600 0.71875rem/1 var(--mono); letter-spacing:.06em;
+}
+h3{
+  margin:1.875rem 0 0.625rem; color:var(--ink);
+  font:600 0.96875rem/1.4 var(--sans); letter-spacing:.005em;
+}
+h4{
+  margin:1.5rem 0 0.5rem; color:var(--ink);
+  font:600 0.85rem/1.35 var(--sans); letter-spacing:.005em;
+}
+h5{
+  margin:1.25rem 0 0.4rem; color:var(--ink);
+  font:600 0.8rem/1.3 var(--sans); letter-spacing:.005em;
+}
+p{margin:0 0 0.875rem}
+p + p{margin-top:-0.125rem}
+strong{color:var(--ink); font-weight:600}
+em{font-style:italic; color:var(--ink)}
+a{color:var(--terra-dark); text-decoration-thickness:0.0625rem; text-underline-offset:0.125rem}
+
+ul{margin:0 0 1rem; padding-left:0; list-style:none}
+ol{margin:0 0 1rem; padding-left:0; list-style:none; counter-reset:item}
+ol li{position:relative; margin:0 0 0.625rem; padding-left:1.5rem}
+ol li::before{
+  content:counter(item) "."; counter-increment:item; position:absolute; left:0.1875rem; top:0;
+  color:var(--terra); font:600 0.7rem/1 var(--mono);
+}
+ul li{position:relative; margin:0 0 0.625rem; padding-left:1.25rem}
+ul li::before{
+  content:""; position:absolute; left:0.1875rem; top:.66em;
+  width:0.375rem; height:0.375rem; border-radius:50%; background:#d8b6a6;
+}
+html[data-theme="dark"] ul li::before{background:#8a5a48}
+li strong{color:var(--ink)}
+
+code{
+  padding:.12em .38em; border-radius:0.3125rem; background:#e9e4d7; color:#7c3f2b;
+  font:.855em/1.5 var(--mono); word-break:break-word;
+}
+html[data-theme="dark"] code{background:#2b2521; color:#f0b49a}
+
+/* ---------- callouts ---------- */
+.callout{
+  margin:1.25rem 0 1.375rem; padding:0.8125rem 1.0625rem 0.875rem;
+  border-left:0.1875rem solid var(--terra); border-radius:0 0.5625rem 0.5625rem 0;
+  background:var(--tint); color:#4b4741; font-size:0.925rem; line-height:1.62;
+}
+.callout strong{color:var(--ink)}
+.callout.warn{border-left-color:var(--amber); background:#f7f0da; color:#4e4734}
+html[data-theme="dark"] .callout{color:var(--prose)}
+html[data-theme="dark"] .callout.warn{background:#2e2a1e; color:#d8cfb8}
+
+/* ---------- FAQ dropdowns ---------- */
+details.faq{
+  margin:0.75rem 0 1rem; border:0.0625rem solid var(--line);
+  border-radius:0.5625rem; background:var(--surface); overflow:hidden;
+}
+details.faq summary{
+  cursor:pointer; padding:0.6875rem 0.875rem; color:var(--ink);
+  font-weight:600; line-height:1.45; list-style:none;
+}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary::before{
+  content:'▸'; display:inline-block; width:1.15em; color:var(--terra-dark);
+  transition:transform .15s;
+}
+details.faq[open] summary::before{content:'▾'}
+details.faq[open] summary{border-bottom:0.0625rem solid var(--line-soft)}
+details.faq > p{
+  margin:0; padding:0.75rem 0.875rem 0.875rem 1.9rem;
+  color:var(--prose); font-size:0.925rem; line-height:1.62;
+}
+html[data-theme="dark"] details.faq summary{color:var(--ink)}
+html[data-theme="dark"] details.faq > p{color:var(--prose)}
+
+/* ---------- code ---------- */
+figure.code, figure.ascii{margin:1.125rem 0 1.375rem; border-radius:0.6875rem; overflow:hidden}
+figure.code{margin-left:-1.375rem; margin-right:-1.375rem}
+figure.code{background:var(--code-bg); border:0.0625rem solid #34312b; box-shadow:0 0.125rem 0.625rem rgba(31,30,29,.07)}
+html[data-theme="dark"] figure.code{border-color:#2b343e; box-shadow:0 0.125rem 0.625rem rgba(0,0,0,.28)}
+figure.code figcaption{
+  display:flex; justify-content:space-between; gap:0.75rem; align-items:center;
+  padding:0.5rem 0.875rem; background:var(--code-bar); border-bottom:0.0625rem solid var(--code-line);
+  color:var(--code-accent); font:0.7125rem/1.4 var(--mono); letter-spacing:.02em;
+}
+figure.code figcaption .lang{color:#7d776b; font-size:0.6625rem; letter-spacing:.1em; text-transform:uppercase}
+html[data-theme="dark"] figure.code figcaption .lang{color:#8f9ba7}
+figure.code pre{
+  margin:0; padding:0.9375rem 1.125rem 1.0625rem; overflow-x:auto;
+  color:var(--code-ink); font:var(--fs-code,0.775rem)/1.66 var(--mono); tab-size:2;
+  white-space:pre-wrap; overflow-wrap:break-word;
+}
+figure.ascii{
+  border:0.0625rem dashed #d3ccbb; background:#f7f4ec;
+}
+html[data-theme="dark"] figure.ascii{border-color:#3a4652; background:#1b2026}
+figure.ascii figcaption{
+  padding:0.4375rem 0.875rem 0; color:var(--stone);
+  font:600 0.65rem/1.4 var(--sans); letter-spacing:.12em; text-transform:uppercase;
+}
+figure.ascii pre{
+  margin:0; padding:0.6875rem 0.875rem 0.9375rem; overflow-x:auto;
+  color:#4c483f; font:0.76875rem/1.55 var(--mono); white-space:pre;
+}
+html[data-theme="dark"] figure.ascii pre{color:#c7d0d8}
+
+/* ---------- tables ---------- */
+.table-wrap{margin:1rem 0 1.375rem; overflow-x:auto; scrollbar-width:thin; scrollbar-color:#cec6b5 transparent}
+.table-wrap::-webkit-scrollbar{height:0.4375rem}
+.table-wrap::-webkit-scrollbar-thumb{background:#d5ccbb; border-radius:0.5rem}
+html[data-theme="dark"] .table-wrap{scrollbar-color:#3a4652 transparent}
+html[data-theme="dark"] .table-wrap::-webkit-scrollbar-thumb{background:#3a4652}
+table{width:100%; border-collapse:collapse; font-size:0.875rem; line-height:1.5}
+thead th{
+  padding:0 0.75rem 0.5rem 0; border-bottom:0.0625rem solid var(--line); text-align:left;
+  color:var(--stone); font:600 0.6625rem/1.3 var(--sans); letter-spacing:.09em; text-transform:uppercase;
+}
+tbody td{padding:0.625rem 0.75rem 0.625rem 0; border-bottom:0.0625rem solid var(--line-soft); vertical-align:top; color:var(--muted)}
+tbody tr:last-child td{border-bottom:none}
+tbody td:first-child{color:var(--ink)}
+tbody td code{font-size:0.75rem}
+tbody td:first-child{white-space:nowrap}
+.tag{
+  display:inline-block; margin-left:0.375rem; padding:0.0625rem 0.375rem; border-radius:1.25rem;
+  background:#f0dcd2; color:#9a4d31; font:600 0.6rem/1.5 var(--sans); letter-spacing:.08em; text-transform:uppercase;
+}
+html[data-theme="dark"] .tag{background:#3a2a24; color:#f0b49a}
+
+.table-wrap.dense table{font-size:0.8125rem}
+.table-wrap.dense tbody td, .table-wrap.dense td code{white-space:normal; overflow-wrap:anywhere}
+.table-wrap.dense tbody td{padding-right:0.625rem}
+.table-wrap.dense tbody td:first-child{min-width:8.5rem}
+
+/* ---------- footer ---------- */
+.colophon{
+  margin-top:3.5rem; padding-top:1.125rem; border-top:0.0625rem solid var(--line);
+  color:var(--stone); font-size:0.775rem; line-height:1.7;
+}
+.colophon code{font-size:0.7rem}
+
+/* ---------- narrow ---------- */
+@media (max-width: 940px){
+  .shell{grid-template-columns:1fr}
+  .sidebar{position:static; height:auto; border-right:none; border-bottom:0.0625rem solid var(--line); padding:1.375rem 1.25rem 1.125rem}
+  .toc{flex-direction:row; flex-wrap:wrap; gap:0.25rem 0.375rem}
+  .toc a{padding:0.3125rem 0.5625rem; border-left:none; border-radius:0.4375rem; background:#eae5d8; font-size:0.775rem}
+  html[data-theme="dark"] .toc a{background:#252f3b}
+  .toc a .n{flex:0 0 auto}
+  .toc a.active{border-left:none}
+  .toc a.l3{font-size:0.74rem}
+  .toc a.l4{font-size:0.70rem}
+  .side-foot{display:none}
+  .progress{left:0}
+  .pane{padding:1.875rem 1.25rem 5.625rem}
+  h2{font-size:1.4375rem}
+  .table-wrap{margin-left:0; margin-right:0}
+  figure.code{margin-left:0; margin-right:0}
+  thead th{white-space:nowrap}
+  tbody td, tbody td code{white-space:normal; overflow-wrap:anywhere}
+}
+
+/* ---------- print ---------- */
+@media print{
+  :root,html[data-theme="dark"]{ --paper:#fff !important; --surface:#fff !important; --ivory:#fff !important; --ink:#1f1e1d !important; --prose:#33302c !important; --muted:#44423d !important; --stone:#6b675f !important; --line:#d8d3c8 !important; --line-soft:#e8e4da !important; --tint:#f8f2ec !important; --terra:#c9633f !important; --terra-dark:#a14e2f !important; --amber:#8a6420 !important; --code-bg:#f6f4ef !important; --code-bar:#efece3 !important; --code-line:#ddd8cc !important; --code-ink:#26241f !important; --code-dim:#6b675f !important; --code-accent:#8f3f27}
+
+  .sidebar,.progress{display:none}
+  .shell{display:block}
+  .pane{padding:0}
+  body{background:#fff; font-size:10.5pt}
+  h2{break-after:avoid} figure,table,.callout,details.faq{break-inside:avoid}
+  figure.code{margin-left:0; margin-right:0}
+  a{color:inherit; text-decoration:none}
+}
+/* ---------- appearance panel (the rounded "Aa" button, top right) ---------- */
+
+#stylebtn{
+  position:fixed; z-index:60; right:18px; top:18px; bottom:auto;
+  display:grid; place-items:center; width:46px; height:46px; padding:0;
+  border:1px solid var(--line); border-radius:50%;
+  background:var(--surface); color:var(--ink);
+  box-shadow:0 6px 22px rgba(31,30,29,.16);
+  font:500 15px/1 var(--serif); cursor:pointer;
+  transition:border-color .14s, color .14s, transform .14s;
+}
+#stylebtn:hover{border-color:var(--terra); color:var(--terra-dark); transform:translateY(-1px)}
+#stylebtn:focus-visible{outline:2px solid var(--terra); outline-offset:2px}
+#stylebtn[aria-expanded="true"]{border-color:var(--terra); color:var(--terra-dark)}
+
+#stylepanel{
+  position:fixed; z-index:61; right:18px; top:76px; bottom:auto;
+  display:flex; flex-direction:column; width:372px;
+  max-height:calc(100vh - 94px);
+  border:1px solid var(--line); border-radius:14px;
+  background:var(--surface); color:var(--ink);
+  box-shadow:0 18px 50px rgba(31,30,29,.24);
+  font:12.5px/1.45 var(--sans);
+}
+#stylepanel[hidden]{display:none}
+
+.sp-head{
+  display:flex; align-items:center; gap:8px;
+  padding:11px 13px; border-bottom:1px solid var(--line-soft);
+}
+.sp-head h2{margin:0; padding:0; border:0; display:block; font:600 13px/1.2 var(--sans); color:var(--ink)}
+.sp-head h2::before{content:none}
+
+.sp-head select,.sp-foot button{
+  padding:5px 9px; border:1px solid var(--line); border-radius:7px;
+  background:var(--ivory); color:var(--ink);
+  font:12.5px/1.3 var(--sans); cursor:pointer;
+}
+.sp-head select:focus-visible,.sp-foot button:focus-visible{outline:2px solid var(--terra); outline-offset:1px}
+
+#sp-close{
+  width:26px; height:26px; padding:0; border:1px solid transparent; border-radius:50%;
+  background:none; color:var(--stone); font:14px/1 var(--sans); cursor:pointer;
+}
+#sp-close:hover{border-color:var(--line); color:var(--ink)}
+
+.sp-body{padding:2px 13px 12px; overflow-x:hidden; overflow-y:auto; scrollbar-width:thin}
+
+.sp-group{padding:11px 0; border-bottom:1px solid var(--line-soft)}
+.sp-group:last-child{border-bottom:0}
+.sp-group h3{
+  margin:0 0 8px; color:var(--stone);
+  font:700 9.5px/1.2 var(--sans); letter-spacing:.12em; text-transform:uppercase;
+}
+.sp-group h3 .tag{margin-left:6px; color:var(--terra-dark); letter-spacing:.04em; text-transform:none}
+
+.sp-row{display:grid; grid-template-columns:1fr auto; gap:2px 10px; align-items:baseline; margin:9px 0}
+.sp-row label{color:var(--muted)}
+.sp-row > *{min-width:0}
+.sp-row output{color:var(--ink); font-variant-numeric:tabular-nums; font-size:11.5px}
+.sp-row input[type="range"]{grid-column:1/-1; width:100%; margin:3px 0 0; accent-color:var(--terra)}
+.sp-row select{
+  grid-column:1/-1; width:100%; margin-top:4px; padding:5px 8px;
+  border:1px solid var(--line); border-radius:7px;
+  background:var(--ivory); color:var(--ink); font:12px/1.4 var(--sans); cursor:pointer;
+}
+.sp-row select:focus-visible{outline:2px solid var(--terra); outline-offset:1px}
+
+.sp-colors label{
+  display:grid; grid-template-columns:26px 1fr auto; gap:8px; align-items:center; padding:2px 0;
+}
+.sp-colors .swatch-label{overflow:hidden; color:var(--muted); text-overflow:ellipsis; white-space:nowrap}
+.sp-colors input[type="color"]{
+  width:26px; height:22px; padding:0; border:1px solid var(--line); border-radius:6px;
+  background:none; cursor:pointer;
+}
+.sp-colors .hex{color:var(--stone); font:11px/1 var(--mono)}
+
+.sp-foot{
+  display:flex; align-items:center; gap:8px;
+  padding:10px 13px; border-top:1px solid var(--line-soft);
+}
+.sp-foot .spacer{flex:1}
+
+@media (max-width:520px){
+  #stylepanel{right:8px; left:8px; width:auto; top:72px; bottom:auto}
+}
+
+@media print{
+  #stylebtn,#stylepanel{display:none !important}
+}
+
+
+/* ============================================================
+   Dashboard components layered on the shared reading-guide
+   template (theme.css). All colours come from the same tokens,
+   so the Aa customiser and dark mode apply automatically.
+   ============================================================ */
+
+/* ---------- section chrome ---------- */
+section{gap:0}
+.section-lede{margin:-0.25rem 0 1.25rem; color:var(--muted); font-size:0.95rem}
+
+/* ---------- KPI cards ---------- */
+.stat-grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(10.5rem,1fr));
+  gap:0.75rem; margin:1.125rem 0 1.5rem;
+}
+.stat-card{
+  position:relative; overflow:hidden;
+  padding:0.875rem 0.9375rem 0.9375rem;
+  border:0.0625rem solid var(--line); border-radius:0.6875rem;
+  background:var(--ivory);
+  box-shadow:0 0.0625rem 0.25rem rgba(31,30,29,.04);
+}
+.stat-card::before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:0.1875rem;
+  background:var(--terra); opacity:.85;
+}
+.stat-card.is-warn::before{background:var(--amber)}
+.stat-card.is-good::before{background:#6f9a6a}
+html[data-theme="dark"] .stat-card{box-shadow:0 0.0625rem 0.375rem rgba(0,0,0,.25)}
+.stat-label{
+  margin:0 0 0.375rem; color:var(--stone);
+  font:600 0.625rem/1.3 var(--sans); letter-spacing:.11em; text-transform:uppercase;
+}
+.stat-value{
+  margin:0; color:var(--ink);
+  font:500 1.5rem/1.05 var(--serif); letter-spacing:-.02em;
+}
+.stat-value .unit{margin-left:.16em; color:var(--stone); font:500 .75rem/1 var(--sans); letter-spacing:0}
+.stat-delta{
+  display:inline-flex; align-items:center; gap:.25rem; margin-top:.5rem;
+  padding:.0625rem .375rem; border-radius:1.25rem;
+  background:var(--tint); color:var(--terra-dark);
+  font:600 .625rem/1.5 var(--sans); letter-spacing:.04em;
+}
+.stat-delta.down{background:#f0dcd2; color:#9a4d31}
+.stat-delta.flat{background:var(--line-soft); color:var(--stone)}
+html[data-theme="dark"] .stat-delta.down{background:#3a2a24; color:#f0b49a}
+html[data-theme="dark"] .stat-delta.flat{background:#263039; color:#9aa7b4}
+.stat-hint{margin:.4375rem 0 0; color:var(--stone); font-size:.7rem; line-height:1.45}
+
+/* ---------- chart cards ---------- */
+.chart-grid{display:grid; grid-template-columns:1.55fr 1fr; gap:0.875rem; margin:1rem 0 1.5rem}
+.chart-card{
+  min-width:0; padding:0.9375rem 1rem 1rem;
+  border:0.0625rem solid var(--line); border-radius:0.6875rem;
+  background:var(--surface);
+}
+html[data-theme="dark"] .chart-card{background:var(--ivory)}
+.chart-head{display:flex; align-items:baseline; justify-content:space-between; gap:.75rem; margin-bottom:.625rem}
+.chart-title{margin:0; color:var(--ink); font:600 .8125rem/1.3 var(--sans)}
+.chart-sub{margin:0; color:var(--stone); font:0.6625rem/1.4 var(--mono)}
+.chart-svg{display:block; width:100%; height:auto; overflow:visible}
+.chart-svg .grid{stroke:var(--line-soft); stroke-width:1}
+.chart-svg .axis{fill:var(--stone); font:9px var(--mono)}
+.chart-svg .series{fill:none; stroke-width:2.25; stroke-linecap:round; stroke-linejoin:round}
+.chart-svg .series-area{stroke:none; opacity:.12}
+.chart-svg .dot{stroke:var(--surface); stroke-width:1.5}
+.legend{display:flex; flex-wrap:wrap; gap:.25rem .875rem; margin:.625rem 0 0; padding:0; list-style:none}
+.legend li{display:flex; align-items:center; gap:.375rem; color:var(--muted); font-size:.6875rem}
+.legend .swatch{width:.5625rem; height:.5625rem; border-radius:50%; flex:0 0 auto}
+
+/* donut */
+.donut-wrap{display:flex; align-items:center; gap:1rem; flex-wrap:wrap}
+.donut{
+  --p1:#d97757; --p2:#b9862f; --p3:#6f9a6a; --p4:#8c877c;
+  position:relative; width:7.75rem; height:7.75rem; flex:0 0 auto; border-radius:50%;
+  background:conic-gradient(var(--p1) 0 46%, var(--p2) 46% 74%, var(--p3) 74% 91%, var(--p4) 91% 100%);
+}
+.donut::after{
+  content:""; position:absolute; inset:24%; border-radius:50%;
+  background:var(--surface); border:0.0625rem solid var(--line);
+}
+html[data-theme="dark"] .donut::after{background:var(--ivory)}
+.donut-center{
+  position:absolute; inset:0; z-index:1; display:grid; place-content:center; text-align:center;
+}
+.donut-center strong{display:block; color:var(--ink); font:500 1.125rem/1.1 var(--serif)}
+.donut-center span{color:var(--stone); font:0.625rem/1.3 var(--sans); letter-spacing:.08em; text-transform:uppercase}
+.bars{flex:1 1 8rem; min-width:8rem; display:flex; flex-direction:column; gap:.5rem}
+.bar-row{display:grid; grid-template-columns:1fr auto; gap:.125rem .5rem; align-items:baseline}
+.bar-row .name{color:var(--muted); font-size:.7rem}
+.bar-row .val{color:var(--ink); font:0.6625rem/1 var(--mono)}
+.bar-track{grid-column:1/-1; height:.3125rem; border-radius:1rem; background:var(--line-soft); overflow:hidden}
+.bar-fill{height:100%; border-radius:1rem; background:var(--terra)}
+
+/* ---------- pills / status ---------- */
+.pill{
+  display:inline-block; padding:0.0625rem 0.4375rem; border-radius:1.25rem;
+  font:600 0.6rem/1.5 var(--sans); letter-spacing:.07em; text-transform:uppercase; white-space:nowrap;
+}
+.pill.good{background:#dfeadb; color:#4d6b49}
+.pill.warn{background:#f7f0da; color:#7a5a1e}
+.pill.bad{background:#f0dcd2; color:#9a4d31}
+html[data-theme="dark"] .pill.good{background:#243328; color:#a9c7a3}
+html[data-theme="dark"] .pill.warn{background:#2e2a1e; color:#d8cfb8}
+html[data-theme="dark"] .pill.bad{background:#3a2a24; color:#f0b49a}
+
+/* ---------- station table ---------- */
+.util{display:flex; align-items:center; gap:.5rem; min-width:6.5rem}
+.util-track{flex:1; height:.3125rem; border-radius:1rem; background:var(--line-soft); overflow:hidden}
+.util-fill{height:100%; border-radius:1rem; background:var(--terra)}
+.util-fill.mid{background:var(--amber)}
+.util-fill.high{background:#6f9a6a}
+.util em{color:var(--stone); font:0.6625rem/1 var(--mono); font-style:normal}
+.table-note{margin:-.375rem 0 0; color:var(--stone); font-size:.7rem}
+
+/* ---------- activity feed ---------- */
+.feed{margin:1rem 0 1.5rem; padding:0; list-style:none}
+.feed li{
+  display:grid; grid-template-columns:4.5rem 1fr auto; gap:.75rem; align-items:baseline;
+  padding:.5625rem 0; border-bottom:0.0625rem solid var(--line-soft);
+}
+.feed li:last-child{border-bottom:0}
+.feed time{color:var(--stone); font:0.6625rem/1.4 var(--mono)}
+.feed .what{color:var(--prose); font-size:.8125rem}
+.feed .what strong{color:var(--ink)}
+.feed .where{color:var(--stone); font-size:.7rem}
+
+/* ---------- notes / callout grid ---------- */
+.note-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(13rem,1fr)); gap:.75rem; margin:1rem 0 1.5rem}
+.note-card{padding:.8125rem .9375rem; border:0.0625rem solid var(--line); border-radius:.5625rem; background:var(--ivory)}
+.note-card h4{margin:0 0 .375rem}
+.note-card p{margin:0; color:var(--muted); font-size:.8rem; line-height:1.55}
+.note-card code{font-size:.72rem}
+
+/* ---------- footer spacing ---------- */
+.colophon{margin-top:2.5rem}
+
+@media (max-width: 940px){
+  .chart-grid{grid-template-columns:1fr}
+  .feed li{grid-template-columns:3.75rem 1fr; gap:.25rem .625rem}
+  .feed .where{display:none}
+}
+
+/* ---------- optional histogram (real-data dashboards) ---------- */
+.chart-card.wide{grid-column:1/-1}
+.hist{display:flex; align-items:flex-end; gap:.5rem; padding:.25rem 0 .125rem}
+.hist-col{flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; gap:.3rem}
+.hist-col .count{color:var(--ink); font:600 .6625rem/1.2 var(--mono)}
+.hist-bar-wrap{width:100%; height:8.5rem; display:flex; align-items:flex-end; justify-content:center}
+.hist-bar{width:72%; max-width:3.25rem; min-height:.125rem; border-radius:.3rem .3rem 0 0; background:var(--terra)}
+.hist-col .bin{max-width:100%; overflow:hidden; color:var(--stone); font:0.6rem/1.3 var(--sans); text-overflow:ellipsis; white-space:nowrap}
+@media (max-width: 640px){
+  .hist-col .count{font-size:.6rem}
+  .hist-bar-wrap{height:6.5rem}
+}
+
+/* ============================================================
+   Dashboard chat — floating bottom-left launcher + panel.
+   Uses the shared theme tokens so light/dark mode follow the
+   Aa customiser automatically.
+   ============================================================ */
+
+#chatbtn{
+  position:fixed; z-index:70; left:18px; bottom:18px;
+  display:grid; place-items:center; width:48px; height:48px; padding:0;
+  border:0; border-radius:50%;
+  background:var(--terra); color:#fff;
+  box-shadow:0 8px 26px rgba(31,30,29,.24);
+  cursor:pointer;
+  transition:transform .14s, box-shadow .14s, background .14s;
+}
+#chatbtn:hover{transform:translateY(-2px); background:var(--terra-dark); box-shadow:0 10px 30px rgba(31,30,29,.3)}
+#chatbtn:focus-visible{outline:2px solid var(--terra); outline-offset:3px}
+#chatbtn svg{width:23px; height:23px; display:block}
+#chatbtn[aria-expanded="true"]{background:var(--terra-dark)}
+
+#chatpanel{
+  position:fixed; z-index:71; left:18px; bottom:78px;
+  display:flex; flex-direction:column;
+  width:390px; max-width:calc(100vw - 24px);
+  max-height:min(72vh, 620px);
+  border:1px solid var(--line); border-radius:14px;
+  background:var(--surface); color:var(--ink);
+  box-shadow:0 20px 56px rgba(31,30,29,.28);
+  overflow:hidden;
+  transition:width .18s ease, height .18s ease, top .18s ease, left .18s ease, transform .18s ease;
+}
+#chatpanel[hidden]{display:none}
+
+#chatpanel .chat-head{
+  display:flex; align-items:flex-start; gap:10px;
+  padding:12px 13px 10px; border-bottom:1px solid var(--line-soft);
+  background:var(--surface);
+}
+#chatpanel .chat-head .chat-title-wrap{flex:1; min-width:0}
+#chatpanel .chat-kicker{
+  margin:0 0 2px; color:var(--terra-dark);
+  font:600 14.25px/1.3 var(--sans); letter-spacing:.13em; text-transform:uppercase;
+}
+#chatpanel .chat-head h2{
+  display:block; margin:0; padding:0; border:0;
+  color:var(--ink); font:500 24px/1.2 var(--serif); letter-spacing:-.01em;
+}
+#chatpanel .chat-head h2 .num{display:none}
+#chatpanel .chat-actions{display:flex; align-items:center; gap:2px; flex:0 0 auto}
+#chat-close,#chat-expand{
+  flex:0 0 auto; width:36px; height:36px; padding:0;
+  border:1px solid transparent; border-radius:50%;
+  background:none; color:var(--stone); font:21px/1 var(--sans); cursor:pointer;
+  display:grid; place-items:center;
+}
+#chat-close:hover,#chat-expand:hover{border-color:var(--line); color:var(--ink)}
+#chat-expand svg{width:20px; height:20px; display:block}
+#chat-expand[aria-pressed="true"]{background:var(--tint); border-color:var(--line); color:var(--terra-dark)}
+
+/* Expanded mode: centered in the viewport, two thirds wide, 2x type. */
+#chatpanel.chat-wide{
+  left:50%; right:auto; top:50%; bottom:auto;
+  transform:translate(-50%,-50%);
+  width:66.667vw; max-width:calc(100vw - 36px);
+  height:min(82vh, 920px); max-height:calc(100vh - 48px);
+  border-radius:18px;
+}
+#chatpanel.chat-wide .chat-head{padding:20px 22px 16px}
+#chatpanel.chat-wide .chat-kicker{font-size:19px}
+#chatpanel.chat-wide .chat-head h2{font-size:32px}
+#chatpanel.chat-wide #chat-close,
+#chatpanel.chat-wide #chat-expand{width:48px; height:48px; font-size:28px}
+#chatpanel.chat-wide #chat-expand svg{width:26px; height:26px}
+#chatpanel.chat-wide .chat-log{padding:20px 22px; gap:14px; max-height:none}
+#chatpanel.chat-wide .chat-msg{
+  max-width:92%; padding:14px 18px; border-radius:16px;
+  font-size:25px; line-height:1.5;
+}
+#chatpanel.chat-wide .chat-msg pre{font-size:1em; padding:12px 14px}
+#chatpanel.chat-wide .chat-typing span{width:9px; height:9px}
+#chatpanel.chat-wide .chat-chips{padding:0 22px 14px; gap:9px}
+#chatpanel.chat-wide .chat-chip{font-size:21px; padding:6px 14px; border-radius:24px}
+#chatpanel.chat-wide .chat-form{padding:16px 20px; gap:12px}
+#chatpanel.chat-wide #chat-input{
+  font-size:25px; padding:12px 16px; border-radius:12px;
+  min-height:3.5rem; max-height:9rem;
+}
+#chatpanel.chat-wide #chat-send{font-size:24px; padding:14px 24px; border-radius:12px}
+#chatpanel.chat-wide .chat-foot{font-size:20px; padding:0 22px 16px}
+
+.chat-log{
+  flex:1 1 auto; min-height:130px; max-height:44vh;
+  overflow-y:auto; overscroll-behavior:contain;
+  padding:12px 12px 10px;
+  display:flex; flex-direction:column; gap:8px;
+  scrollbar-width:thin; scrollbar-color:var(--line) transparent;
+}
+.chat-log::-webkit-scrollbar{width:6px}
+.chat-log::-webkit-scrollbar-thumb{background:var(--line); border-radius:8px}
+
+.chat-msg{
+  max-width:90%; padding:7px 10px;
+  border-radius:10px; border:1px solid var(--line);
+  background:var(--ivory); color:var(--prose);
+  font:18.75px/1.52 var(--sans); overflow-wrap:anywhere;
+}
+.chat-msg.bot{align-self:flex-start; border-top-left-radius:3px}
+.chat-msg.user{
+  align-self:flex-end; border-color:transparent;
+  border-top-right-radius:3px; background:var(--tint); color:var(--ink);
+}
+.chat-msg.error{border-color:var(--terra); background:#f7e8e1; color:#7c3f2b}
+html[data-theme="dark"] .chat-msg.error{background:#3a241d; color:#f0b49a}
+.chat-msg code{
+  padding:.06em .28em; border-radius:4px;
+  background:var(--line-soft); color:var(--terra-dark);
+  font:.86em/1.45 var(--mono);
+}
+.chat-msg pre{
+  margin:6px 0 2px; padding:7px 8px; border-radius:6px;
+  background:var(--code-bg); color:var(--code-ink);
+  overflow-x:auto; font:1.05rem/1.5 var(--mono);
+}
+.chat-msg pre code{background:none; color:inherit; padding:0}
+.chat-msg strong{color:var(--ink)}
+.chat-msg ul{margin:4px 0 2px; padding-left:1rem; list-style:disc}
+.chat-msg ul li{margin:0; padding:0}
+.chat-msg ul li::before{content:none}
+.chat-typing{display:inline-flex; gap:4px; align-items:center; min-height:18px}
+.chat-typing span{
+  width:7px; height:7px; border-radius:50%; background:var(--stone);
+  animation:chat-blink 1.2s infinite ease-in-out;
+}
+.chat-typing span:nth-child(2){animation-delay:.16s}
+.chat-typing span:nth-child(3){animation-delay:.32s}
+@keyframes chat-blink{0%,80%,100%{opacity:.25; transform:translateY(0)}40%{opacity:1; transform:translateY(-2px)}}
+
+.chat-chips{display:flex; flex-wrap:wrap; gap:8px; padding:0 14px 11px}
+.chat-chip{
+  padding:5px 12px; border:1px solid var(--line); border-radius:20px;
+  background:var(--ivory); color:var(--muted);
+  font:16.5px/1.35 var(--sans); cursor:pointer; text-align:left;
+}
+.chat-chip:hover{border-color:var(--terra); color:var(--terra-dark)}
+
+.chat-form{
+  display:flex; gap:7px; align-items:flex-end;
+  padding:13px 15px; border-top:1px solid var(--line-soft);
+  background:var(--surface);
+}
+#chat-input{
+  flex:1; min-width:0; resize:none;
+  padding:7px 9px; border:1px solid var(--line); border-radius:8px;
+  background:var(--ivory); color:var(--ink);
+  font:18.75px/1.45 var(--sans);
+  min-height:2.75rem;
+  max-height:6.5rem;
+}
+#chat-input:focus{outline:2px solid var(--terra); outline-offset:1px}
+#chat-input:disabled{opacity:.55; cursor:not-allowed}
+#chat-send{
+  flex:0 0 auto; padding:7px 12px; border:1px solid var(--terra); border-radius:8px;
+  background:var(--terra); color:#fff; font:600 18px/1.4 var(--sans); cursor:pointer;
+}
+#chat-send:hover{background:var(--terra-dark); border-color:var(--terra-dark)}
+#chat-send:disabled{opacity:.5; cursor:not-allowed}
+#chat-send:focus-visible{outline:2px solid var(--terra); outline-offset:2px}
+
+#chatpanel .chat-foot{
+  margin:0; padding:0 12px 9px;
+  color:var(--stone); font:15.75px/1.45 var(--sans);
+  background:var(--surface);
+}
+#chatpanel .chat-foot code{font-size:.9em}
+
+@media (max-width:760px){
+  #chatpanel.chat-wide{
+    left:8px; right:8px; width:auto; max-width:none;
+    top:50%; bottom:auto; transform:translateY(-50%);
+    height:min(86vh, 800px);
+  }
+}
+@media (max-width:520px){
+  #chatpanel{left:8px; right:8px; width:auto; bottom:72px; max-height:78vh}
+  #chatbtn{left:12px; bottom:12px; width:44px; height:44px}
+}
+
+@media print{
+  #chatbtn,#chatpanel{display:none !important}
+}
+
+</style>
+<script>
+(function () {
+  try {
+    var saved = JSON.parse(localStorage.getItem('mca-site-customiser:v2')) || {};
+    var mode = saved.mode === 'light' || saved.mode === 'dark' ? saved.mode : 'auto';
+    var dark = mode === 'dark' || (mode === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  } catch (e) { /* no stored preference */ }
+})();
+
+</script>
+</head>
+<body>
+<div class="progress"><span id="bar"></span></div>
+<div class="shell">
+
+  <aside class="sidebar">
+    <a class="side-kicker" href="#top">live-data-app &middot; dashboard</a>
+    <p class="side-title">Brighton Bikeshare</p>
+    <p class="side-sub">Live GBFS snapshot analysed with the ETL + analytics pipeline in src/.</p>
+    <div class="side-rule"></div>
+    <p class="side-label">Contents</p>
+    <nav class="toc" id="toc">
+      <a href="#overview" class="l2"><span class="n">01</span><span>Overview</span></a>
+      <a href="#kpis" class="l2"><span class="n">02</span><span>KPI cards</span></a>
+      <a href="#trend" class="l2"><span class="n">03</span><span>Charts</span></a>
+      <a href="#stations" class="l2"><span class="n">04</span><span>Station table</span></a>
+      <a href="#activity" class="l2"><span class="n">05</span><span>Pipeline activity</span></a>
+      <a href="#quality" class="l2"><span class="n">06</span><span>Data quality</span></a>
+      <a href="#next" class="l2"><span class="n">07</span><span>Recommended actions</span></a>
+    </nav>
+    <div class="side-foot">
+      Source <code>data_20261104T045733Z.csv</code><br>119 stations · 1,496 capacity
+    </div>
+  </aside>
+
+  <main class="pane" id="top">
+    <div class="inner">
+      <header class="page-heading">
+        <p class="eyebrow">Brighton cycle hire · GBFS snapshot</p>
+        <h1>Brighton Bikeshare dashboard</h1>
+        <p class="lede">ETL and analytics over 119 stations from data_20261104T045733Z.csv. 510 bikes and 756 free docks at 34.1% network utilisation.</p>
+        <p class="meta">
+          <span>2026-11-04 04:57 UTC</span>
+          <span>119 stations</span>
+          <span>510 bikes</span>
+          <span>756 free docks</span>
+          <span>34.1% utilised</span>
+        </p>
+      </header>
+
+<section id="overview">
+<h2><span class="num">01</span><span>Overview</span></h2>
+<p class="section-lede">This snapshot captures 119 stations with 510 bikes and 756 free docks. Utilisation is 34.1% when weighted by capacity, and 482s of feed age is carried through to the quality checks.</p>
+<div class="callout"><strong>Live snapshot.</strong> 119 stations, 510 bikes, and 756 free docks. The KPI utilisation is capacity-weighted (34.1%), which differs from the mean of station-level percentages. 4 stations report more bikes than capacity and 20 are empty — see the actions below.</div>
+<div class="note-grid">
+  <article class="note-card">
+    <h4>Capacity Matches Reported Docks</h4>
+    <p>82 stations where capacity != total_docks_reported</p>
+  </article>
+  <article class="note-card">
+    <h4>Utilisation Within Capacity</h4>
+    <p>4 stations report more bikes than capacity</p>
+  </article>
+  <article class="note-card">
+    <h4>Stations Available</h4>
+    <p>4 stations are not available</p>
+  </article>
+</div>
+</section>
+
+<section id="kpis">
+<h2><span class="num">02</span><span>KPI cards</span></h2>
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-label">Total stations</p>
+    <p class="stat-value">119</p>
+    
+    <p class="stat-hint">115 renting · 4 unavailable</p>
+  </article>
+  <article class="stat-card is-good">
+    <p class="stat-label">Bikes available</p>
+    <p class="stat-value">510</p>
+    
+    <p class="stat-hint">270 e-bikes · 52.9% of fleet</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-label">Free docks</p>
+    <p class="stat-value">756</p>
+    
+    <p class="stat-hint">1,496 total capacity</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-label">Utilisation</p>
+    <p class="stat-value">34.1<span class="unit">%</span></p>
+    
+    <p class="stat-hint">510 bikes / 1,496 capacity</p>
+  </article>
+  <article class="stat-card is-warn">
+    <p class="stat-label">Empty stations</p>
+    <p class="stat-value">20</p>
+    
+    <p class="stat-hint">16.8% of stations have no bikes</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-label">Quality warnings</p>
+    <p class="stat-value">3</p>
+    
+    <p class="stat-hint">Checks needing review; see Data quality</p>
+  </article>
+</div>
+</section>
+
+<section id="trend">
+<h2><span class="num">03</span><span>Charts</span></h2>
+<div class="chart-grid">
+<figure class="chart-card" style="margin:0">
+  <div class="chart-head">
+    <p class="chart-title">Station availability profile</p>
+    <p class="chart-sub">119 stations · sorted by utilisation</p>
+  </div>
+  <svg class="chart-svg" viewBox="0 0 720 260" role="img" aria-label="Station availability profile">
+    <line class="grid" x1="42" y1="14.0" x2="706" y2="14.0"/>
+    <line class="grid" x1="42" y1="68.5" x2="706" y2="68.5"/>
+    <line class="grid" x1="42" y1="123.0" x2="706" y2="123.0"/>
+    <line class="grid" x1="42" y1="177.5" x2="706" y2="177.5"/>
+    <line class="grid" x1="42" y1="232.0" x2="706" y2="232.0"/>
+    <text class="axis" x="34" y="17.0" text-anchor="end">25</text>
+    <text class="axis" x="34" y="71.5" text-anchor="end">19</text>
+    <text class="axis" x="34" y="126.0" text-anchor="end">13</text>
+    <text class="axis" x="34" y="180.5" text-anchor="end">6</text>
+    <text class="axis" x="34" y="235.0" text-anchor="end">0</text>
+    <text class="axis" x="42.0" y="252" text-anchor="middle">1</text>
+    <text class="axis" x="137.7" y="252" text-anchor="middle">18</text>
+    <text class="axis" x="233.3" y="252" text-anchor="middle">35</text>
+    <text class="axis" x="329.0" y="252" text-anchor="middle">52</text>
+    <text class="axis" x="424.6" y="252" text-anchor="middle">69</text>
+    <text class="axis" x="520.3" y="252" text-anchor="middle">86</text>
+    <text class="axis" x="616.0" y="252" text-anchor="middle">103</text>
+    <text class="axis" x="706.0" y="252" text-anchor="middle">119</text>
+    <path class="series-area" d="M 42.0,232.0 L 42.0,232.0 L 47.6,232.0 L 53.3,232.0 L 58.9,232.0 L 64.5,232.0 L 70.1,232.0 L 75.8,232.0 L 81.4,232.0 L 87.0,232.0 L 92.6,232.0 L 98.3,232.0 L 103.9,232.0 L 109.5,232.0 L 115.2,232.0 L 120.8,232.0 L 126.4,232.0 L 132.0,232.0 L 137.7,232.0 L 143.3,232.0 L 148.9,232.0 L 154.5,223.3 L 160.2,223.3 L 165.8,214.6 L 171.4,214.6 L 177.1,223.3 L 182.7,223.3 L 188.3,223.3 L 193.9,223.3 L 199.6,223.3 L 205.2,223.3 L 210.8,223.3 L 216.4,223.3 L 222.1,223.3 L 227.7,205.8 L 233.3,205.8 L 238.9,214.6 L 244.6,214.6 L 250.2,223.3 L 255.8,223.3 L 261.5,214.6 L 267.1,214.6 L 272.7,214.6 L 278.3,179.7 L 284.0,171.0 L 289.6,205.8 L 295.2,214.6 L 300.8,214.6 L 306.5,205.8 L 312.1,205.8 L 317.7,205.8 L 323.4,205.8 L 329.0,205.8 L 334.6,205.8 L 340.2,179.7 L 345.9,179.7 L 351.5,197.1 L 357.1,197.1 L 362.7,188.4 L 368.4,101.2 L 374.0,205.8 L 379.6,205.8 L 385.3,205.8 L 390.9,197.1 L 396.5,197.1 L 402.1,118.6 L 407.8,214.6 L 413.4,214.6 L 419.0,197.1 L 424.6,171.0 L 430.3,205.8 L 435.9,179.7 L 441.5,127.4 L 447.2,197.1 L 452.8,197.1 L 458.4,162.2 L 464.0,153.5 L 469.7,153.5 L 475.3,197.1 L 480.9,188.4 L 486.5,188.4 L 492.2,188.4 L 497.8,188.4 L 503.4,127.4 L 509.1,171.0 L 514.7,179.7 L 520.3,188.4 L 525.9,188.4 L 531.6,197.1 L 537.2,197.1 L 542.8,197.1 L 548.4,197.1 L 554.1,162.2 L 559.7,179.7 L 565.3,162.2 L 570.9,188.4 L 576.6,188.4 L 582.2,188.4 L 587.8,171.0 L 593.5,197.1 L 599.1,179.7 L 604.7,162.2 L 610.3,136.1 L 616.0,179.7 L 621.6,153.5 L 627.2,197.1 L 632.8,162.2 L 638.5,171.0 L 644.1,171.0 L 649.7,171.0 L 655.4,197.1 L 661.0,188.4 L 666.6,153.5 L 672.2,136.1 L 677.9,136.1 L 683.5,118.6 L 689.1,144.8 L 694.7,75.0 L 700.4,162.2 L 706.0,109.9 L 706.0,232.0 Z" fill="#d97757"/>
+    <path class="series" d="M 42.0,232.0 L 47.6,232.0 L 53.3,232.0 L 58.9,232.0 L 64.5,232.0 L 70.1,232.0 L 75.8,232.0 L 81.4,232.0 L 87.0,232.0 L 92.6,232.0 L 98.3,232.0 L 103.9,232.0 L 109.5,232.0 L 115.2,232.0 L 120.8,232.0 L 126.4,232.0 L 132.0,232.0 L 137.7,232.0 L 143.3,232.0 L 148.9,232.0 L 154.5,223.3 L 160.2,223.3 L 165.8,214.6 L 171.4,214.6 L 177.1,223.3 L 182.7,223.3 L 188.3,223.3 L 193.9,223.3 L 199.6,223.3 L 205.2,223.3 L 210.8,223.3 L 216.4,223.3 L 222.1,223.3 L 227.7,205.8 L 233.3,205.8 L 238.9,214.6 L 244.6,214.6 L 250.2,223.3 L 255.8,223.3 L 261.5,214.6 L 267.1,214.6 L 272.7,214.6 L 278.3,179.7 L 284.0,171.0 L 289.6,205.8 L 295.2,214.6 L 300.8,214.6 L 306.5,205.8 L 312.1,205.8 L 317.7,205.8 L 323.4,205.8 L 329.0,205.8 L 334.6,205.8 L 340.2,179.7 L 345.9,179.7 L 351.5,197.1 L 357.1,197.1 L 362.7,188.4 L 368.4,101.2 L 374.0,205.8 L 379.6,205.8 L 385.3,205.8 L 390.9,197.1 L 396.5,197.1 L 402.1,118.6 L 407.8,214.6 L 413.4,214.6 L 419.0,197.1 L 424.6,171.0 L 430.3,205.8 L 435.9,179.7 L 441.5,127.4 L 447.2,197.1 L 452.8,197.1 L 458.4,162.2 L 464.0,153.5 L 469.7,153.5 L 475.3,197.1 L 480.9,188.4 L 486.5,188.4 L 492.2,188.4 L 497.8,188.4 L 503.4,127.4 L 509.1,171.0 L 514.7,179.7 L 520.3,188.4 L 525.9,188.4 L 531.6,197.1 L 537.2,197.1 L 542.8,197.1 L 548.4,197.1 L 554.1,162.2 L 559.7,179.7 L 565.3,162.2 L 570.9,188.4 L 576.6,188.4 L 582.2,188.4 L 587.8,171.0 L 593.5,197.1 L 599.1,179.7 L 604.7,162.2 L 610.3,136.1 L 616.0,179.7 L 621.6,153.5 L 627.2,197.1 L 632.8,162.2 L 638.5,171.0 L 644.1,171.0 L 649.7,171.0 L 655.4,197.1 L 661.0,188.4 L 666.6,153.5 L 672.2,136.1 L 677.9,136.1 L 683.5,118.6 L 689.1,144.8 L 694.7,75.0 L 700.4,162.2 L 706.0,109.9" stroke="#d97757"/>
+      <circle class="dot" cx="42.0" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="47.6" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="53.3" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="58.9" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="64.5" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="70.1" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="75.8" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="81.4" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="87.0" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="92.6" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="98.3" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="103.9" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="109.5" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="115.2" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="120.8" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="126.4" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="132.0" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="137.7" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="143.3" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="148.9" cy="232.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="154.5" cy="223.3" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="160.2" cy="223.3" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="165.8" cy="214.6" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="171.4" cy="214.6" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="177.1" cy="223.3" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="182.7" cy="223.3" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="188.3" cy="223.3" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="193.9" cy="223.3" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="199.6" cy="223.3" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="205.2" cy="223.3" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="210.8" cy="223.3" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="216.4" cy="223.3" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="222.1" cy="223.3" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="227.7" cy="205.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="233.3" cy="205.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="238.9" cy="214.6" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="244.6" cy="214.6" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="250.2" cy="223.3" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="255.8" cy="223.3" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="261.5" cy="214.6" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="267.1" cy="214.6" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="272.7" cy="214.6" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="278.3" cy="179.7" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="284.0" cy="171.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="289.6" cy="205.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="295.2" cy="214.6" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="300.8" cy="214.6" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="306.5" cy="205.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="312.1" cy="205.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="317.7" cy="205.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="323.4" cy="205.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="329.0" cy="205.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="334.6" cy="205.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="340.2" cy="179.7" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="345.9" cy="179.7" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="351.5" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="357.1" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="362.7" cy="188.4" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="368.4" cy="101.2" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="374.0" cy="205.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="379.6" cy="205.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="385.3" cy="205.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="390.9" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="396.5" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="402.1" cy="118.6" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="407.8" cy="214.6" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="413.4" cy="214.6" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="419.0" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="424.6" cy="171.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="430.3" cy="205.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="435.9" cy="179.7" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="441.5" cy="127.4" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="447.2" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="452.8" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="458.4" cy="162.2" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="464.0" cy="153.5" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="469.7" cy="153.5" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="475.3" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="480.9" cy="188.4" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="486.5" cy="188.4" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="492.2" cy="188.4" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="497.8" cy="188.4" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="503.4" cy="127.4" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="509.1" cy="171.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="514.7" cy="179.7" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="520.3" cy="188.4" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="525.9" cy="188.4" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="531.6" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="537.2" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="542.8" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="548.4" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="554.1" cy="162.2" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="559.7" cy="179.7" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="565.3" cy="162.2" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="570.9" cy="188.4" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="576.6" cy="188.4" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="582.2" cy="188.4" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="587.8" cy="171.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="593.5" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="599.1" cy="179.7" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="604.7" cy="162.2" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="610.3" cy="136.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="616.0" cy="179.7" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="621.6" cy="153.5" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="627.2" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="632.8" cy="162.2" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="638.5" cy="171.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="644.1" cy="171.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="649.7" cy="171.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="655.4" cy="197.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="661.0" cy="188.4" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="666.6" cy="153.5" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="672.2" cy="136.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="677.9" cy="136.1" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="683.5" cy="118.6" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="689.1" cy="144.8" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="694.7" cy="75.0" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="700.4" cy="162.2" r="2.6" fill="#d97757"/>
+      <circle class="dot" cx="706.0" cy="109.9" r="2.6" fill="#d97757"/>
+    
+    <path class="series" d="M 42.0,92.5 L 47.6,101.2 L 53.3,171.0 L 58.9,179.7 L 64.5,127.4 L 70.1,179.7 L 75.8,188.4 L 81.4,144.8 L 87.0,197.1 L 92.6,188.4 L 98.3,179.7 L 103.9,197.1 L 109.5,197.1 L 115.2,162.2 L 120.8,188.4 L 126.4,188.4 L 132.0,171.0 L 137.7,188.4 L 143.3,197.1 L 148.9,197.1 L 154.5,162.2 L 160.2,144.8 L 165.8,118.6 L 171.4,197.1 L 177.1,127.4 L 182.7,153.5 L 188.3,136.1 L 193.9,162.2 L 199.6,162.2 L 205.2,153.5 L 210.8,153.5 L 216.4,179.7 L 222.1,171.0 L 227.7,127.4 L 233.3,171.0 L 238.9,153.5 L 244.6,179.7 L 250.2,197.1 L 255.8,197.1 L 261.5,162.2 L 267.1,179.7 L 272.7,171.0 L 278.3,153.5 L 284.0,118.6 L 289.6,144.8 L 295.2,188.4 L 300.8,179.7 L 306.5,153.5 L 312.1,197.1 L 317.7,179.7 L 323.4,171.0 L 329.0,179.7 L 334.6,171.0 L 340.2,197.1 L 345.9,118.6 L 351.5,171.0 L 357.1,153.5 L 362.7,136.1 L 368.4,57.6 L 374.0,179.7 L 379.6,197.1 L 385.3,179.7 L 390.9,179.7 L 396.5,171.0 L 402.1,144.8 L 407.8,197.1 L 413.4,197.1 L 419.0,197.1 L 424.6,162.2 L 430.3,197.1 L 435.9,179.7 L 441.5,118.6 L 447.2,188.4 L 452.8,197.1 L 458.4,144.8 L 464.0,136.1 L 469.7,153.5 L 475.3,197.1 L 480.9,197.1 L 486.5,188.4 L 492.2,188.4 L 497.8,188.4 L 503.4,197.1 L 509.1,197.1 L 514.7,188.4 L 520.3,197.1 L 525.9,197.1 L 531.6,197.1 L 537.2,197.1 L 542.8,197.1 L 548.4,197.1 L 554.1,188.4 L 559.7,197.1 L 565.3,188.4 L 570.9,197.1 L 576.6,197.1 L 582.2,197.1 L 587.8,197.1 L 593.5,197.1 L 599.1,197.1 L 604.7,197.1 L 610.3,197.1 L 616.0,197.1 L 621.6,197.1 L 627.2,197.1 L 632.8,197.1 L 638.5,197.1 L 644.1,197.1 L 649.7,197.1 L 655.4,197.1 L 661.0,197.1 L 666.6,197.1 L 672.2,197.1 L 677.9,197.1 L 683.5,197.1 L 689.1,197.1 L 694.7,197.1 L 700.4,197.1 L 706.0,197.1" stroke="#6f9a6a"/>
+      <circle class="dot" cx="42.0" cy="92.5" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="47.6" cy="101.2" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="53.3" cy="171.0" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="58.9" cy="179.7" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="64.5" cy="127.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="70.1" cy="179.7" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="75.8" cy="188.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="81.4" cy="144.8" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="87.0" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="92.6" cy="188.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="98.3" cy="179.7" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="103.9" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="109.5" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="115.2" cy="162.2" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="120.8" cy="188.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="126.4" cy="188.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="132.0" cy="171.0" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="137.7" cy="188.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="143.3" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="148.9" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="154.5" cy="162.2" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="160.2" cy="144.8" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="165.8" cy="118.6" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="171.4" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="177.1" cy="127.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="182.7" cy="153.5" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="188.3" cy="136.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="193.9" cy="162.2" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="199.6" cy="162.2" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="205.2" cy="153.5" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="210.8" cy="153.5" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="216.4" cy="179.7" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="222.1" cy="171.0" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="227.7" cy="127.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="233.3" cy="171.0" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="238.9" cy="153.5" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="244.6" cy="179.7" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="250.2" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="255.8" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="261.5" cy="162.2" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="267.1" cy="179.7" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="272.7" cy="171.0" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="278.3" cy="153.5" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="284.0" cy="118.6" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="289.6" cy="144.8" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="295.2" cy="188.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="300.8" cy="179.7" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="306.5" cy="153.5" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="312.1" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="317.7" cy="179.7" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="323.4" cy="171.0" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="329.0" cy="179.7" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="334.6" cy="171.0" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="340.2" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="345.9" cy="118.6" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="351.5" cy="171.0" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="357.1" cy="153.5" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="362.7" cy="136.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="368.4" cy="57.6" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="374.0" cy="179.7" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="379.6" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="385.3" cy="179.7" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="390.9" cy="179.7" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="396.5" cy="171.0" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="402.1" cy="144.8" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="407.8" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="413.4" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="419.0" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="424.6" cy="162.2" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="430.3" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="435.9" cy="179.7" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="441.5" cy="118.6" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="447.2" cy="188.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="452.8" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="458.4" cy="144.8" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="464.0" cy="136.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="469.7" cy="153.5" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="475.3" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="480.9" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="486.5" cy="188.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="492.2" cy="188.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="497.8" cy="188.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="503.4" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="509.1" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="514.7" cy="188.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="520.3" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="525.9" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="531.6" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="537.2" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="542.8" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="548.4" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="554.1" cy="188.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="559.7" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="565.3" cy="188.4" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="570.9" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="576.6" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="582.2" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="587.8" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="593.5" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="599.1" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="604.7" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="610.3" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="616.0" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="621.6" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="627.2" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="632.8" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="638.5" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="644.1" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="649.7" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="655.4" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="661.0" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="666.6" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="672.2" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="677.9" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="683.5" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="689.1" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="694.7" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="700.4" cy="197.1" r="2.6" fill="#6f9a6a"/>
+      <circle class="dot" cx="706.0" cy="197.1" r="2.6" fill="#6f9a6a"/>
+  </svg>
+  <ul class="legend">
+      <li><span class="swatch" style="background:#d97757"></span>Bikes</li>
+      <li><span class="swatch" style="background:#6f9a6a"></span>Free docks</li>
+  </ul>
+</figure>
+<figure class="chart-card" style="margin:0">
+  <div class="chart-head">
+    <p class="chart-title">Vehicle mix</p>
+  </div>
+  <div class="donut-wrap">
+    <div class="donut" style="background:conic-gradient(#d97757 0.00% 47.06%, #6f9a6a 47.06% 100.00%)" role="img" aria-label="Vehicle mix">
+      <div class="donut-center"><strong>510</strong><span>bikes</span></div>
+    </div>
+
+  </div>
+</figure>
+<figure class="chart-card" style="margin:0">
+  <div class="chart-head">
+    <p class="chart-title">Bikes by zone</p>
+  </div>
+  <div class="bars" style="margin-top:.375rem">
+      <div class="bar-row">
+        <span class="name">BTN_Phase_2</span>
+        <span class="val">90%</span>
+        <span class="bar-track"><span class="bar-fill" style="width:90.2%;background:#6f9a6a"></span></span>
+      </div>
+      <div class="bar-row">
+        <span class="name">University of Sussex</span>
+        <span class="val">4%</span>
+        <span class="bar-track"><span class="bar-fill" style="width:3.7%;background:#8c877c"></span></span>
+      </div>
+      <div class="bar-row">
+        <span class="name">UoB - Moulsecoomb Campus</span>
+        <span class="val">3%</span>
+        <span class="bar-track"><span class="bar-fill" style="width:2.7%;background:#5f8f8a"></span></span>
+      </div>
+      <div class="bar-row">
+        <span class="name">UoB - Falmer Campus</span>
+        <span class="val">2%</span>
+        <span class="bar-track"><span class="bar-fill" style="width:2.4%;background:#c9633f"></span></span>
+      </div>
+      <div class="bar-row">
+        <span class="name">George Street</span>
+        <span class="val">1%</span>
+        <span class="bar-track"><span class="bar-fill" style="width:0.6%;background:#b9862f"></span></span>
+      </div>
+      <div class="bar-row">
+        <span class="name">A27 Slip Roads</span>
+        <span class="val">0%</span>
+        <span class="bar-track"><span class="bar-fill" style="width:0.4%;background:#d97757"></span></span>
+      </div>
+  </div>
+</figure>
+<figure class="chart-card wide" style="margin:0">
+  <div class="chart-head">
+    <p class="chart-title">Utilisation distribution</p>
+    <p class="chart-sub">station count per band</p>
+  </div>
+  <div class="hist">
+    <div class="hist-col">
+      <span class="count">20</span>
+      <span class="hist-bar-wrap"><span class="hist-bar" style="height:60.6%"></span></span>
+      <span class="bin">0%</span>
+    </div>
+    <div class="hist-col">
+      <span class="count">30</span>
+      <span class="hist-bar-wrap"><span class="hist-bar" style="height:90.9%"></span></span>
+      <span class="bin">1–25%</span>
+    </div>
+    <div class="hist-col">
+      <span class="count">33</span>
+      <span class="hist-bar-wrap"><span class="hist-bar" style="height:100.0%"></span></span>
+      <span class="bin">26–50%</span>
+    </div>
+    <div class="hist-col">
+      <span class="count">21</span>
+      <span class="hist-bar-wrap"><span class="hist-bar" style="height:63.6%"></span></span>
+      <span class="bin">51–75%</span>
+    </div>
+    <div class="hist-col">
+      <span class="count">11</span>
+      <span class="hist-bar-wrap"><span class="hist-bar" style="height:33.3%"></span></span>
+      <span class="bin">76–100%</span>
+    </div>
+    <div class="hist-col">
+      <span class="count">4</span>
+      <span class="hist-bar-wrap"><span class="hist-bar" style="height:12.1%"></span></span>
+      <span class="bin">&gt;100%</span>
+    </div>
+  </div>
+</figure>
+</div>
+</section>
+
+<section id="stations">
+<h2><span class="num">04</span><span>Station table</span></h2>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Station</th><th>Bikes</th><th>Free docks</th><th>Utilisation</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Preston Circus</td>
+        <td>14</td>
+        <td>4</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill high" style="width:156%"></span></span>
+            <em>156%</em>
+          </span>
+        </td>
+        <td><span class="pill warn">busy</span></td>
+      </tr>
+      <tr>
+        <td>Preston Park / Preston Road</td>
+        <td>18</td>
+        <td>4</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill high" style="width:129%"></span></span>
+            <em>129%</em>
+          </span>
+        </td>
+        <td><span class="pill warn">busy</span></td>
+      </tr>
+      <tr>
+        <td>New Church Road / Boundary Road</td>
+        <td>10</td>
+        <td>4</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill high" style="width:125%"></span></span>
+            <em>125%</em>
+          </span>
+        </td>
+        <td><span class="pill warn">busy</span></td>
+      </tr>
+      <tr>
+        <td>Moulsecoomb Way</td>
+        <td>13</td>
+        <td>4</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill high" style="width:100%"></span></span>
+            <em>100%</em>
+          </span>
+        </td>
+        <td><span class="pill warn">busy</span></td>
+      </tr>
+      <tr>
+        <td>Portland Road / Shelley Road</td>
+        <td>11</td>
+        <td>4</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill high" style="width:100%"></span></span>
+            <em>100%</em>
+          </span>
+        </td>
+        <td><span class="pill warn">busy</span></td>
+      </tr>
+      <tr>
+        <td>Saltdean Lido</td>
+        <td>11</td>
+        <td>4</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill high" style="width:100%"></span></span>
+            <em>100%</em>
+          </span>
+        </td>
+        <td><span class="pill warn">busy</span></td>
+      </tr>
+      <tr>
+        <td>Portslade Station - South</td>
+        <td>9</td>
+        <td>4</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill high" style="width:100%"></span></span>
+            <em>100%</em>
+          </span>
+        </td>
+        <td><span class="pill warn">busy</span></td>
+      </tr>
+      <tr>
+        <td>Ladies' Mile Road</td>
+        <td>9</td>
+        <td>4</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill mid" style="width:75%"></span></span>
+            <em>75%</em>
+          </span>
+        </td>
+        <td><span class="pill good">healthy</span></td>
+      </tr>
+      <tr>
+        <td>University of Sussex - Sports Centre</td>
+        <td>11</td>
+        <td>4</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill mid" style="width:69%"></span></span>
+            <em>69%</em>
+          </span>
+        </td>
+        <td><span class="pill good">healthy</span></td>
+      </tr>
+      <tr>
+        <td>i360</td>
+        <td>12</td>
+        <td>4</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill mid" style="width:50%"></span></span>
+            <em>50%</em>
+          </span>
+        </td>
+        <td><span class="pill good">healthy</span></td>
+      </tr>
+      <tr>
+        <td>Lewes Road &amp; Elm Grove</td>
+        <td>9</td>
+        <td>9</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill mid" style="width:47%"></span></span>
+            <em>47%</em>
+          </span>
+        </td>
+        <td><span class="pill good">healthy</span></td>
+      </tr>
+      <tr>
+        <td>John Street</td>
+        <td>9</td>
+        <td>11</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill mid" style="width:45%"></span></span>
+            <em>45%</em>
+          </span>
+        </td>
+        <td><span class="pill good">healthy</span></td>
+      </tr>
+      <tr>
+        <td>Brighton Marina</td>
+        <td>12</td>
+        <td>13</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill" style="width:43%"></span></span>
+            <em>43%</em>
+          </span>
+        </td>
+        <td><span class="pill good">healthy</span></td>
+      </tr>
+      <tr>
+        <td>Whitecross Street</td>
+        <td>13</td>
+        <td>10</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill" style="width:37%"></span></span>
+            <em>37%</em>
+          </span>
+        </td>
+        <td><span class="pill good">healthy</span></td>
+      </tr>
+      <tr>
+        <td>Hove Lawns</td>
+        <td>15</td>
+        <td>20</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill" style="width:32%"></span></span>
+            <em>32%</em>
+          </span>
+        </td>
+        <td><span class="pill good">healthy</span></td>
+      </tr>
+      <tr>
+        <td>Hove Station - South</td>
+        <td>0</td>
+        <td>6</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill" style="width:0%"></span></span>
+            <em>0%</em>
+          </span>
+        </td>
+        <td><span class="pill warn">empty</span></td>
+      </tr>
+      <tr>
+        <td>Brighton Palace Pier</td>
+        <td>0</td>
+        <td>7</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill" style="width:0%"></span></span>
+            <em>0%</em>
+          </span>
+        </td>
+        <td><span class="pill warn">empty</span></td>
+      </tr>
+      <tr>
+        <td>Duke's Mound</td>
+        <td>0</td>
+        <td>6</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill" style="width:0%"></span></span>
+            <em>0%</em>
+          </span>
+        </td>
+        <td><span class="pill warn">empty</span></td>
+      </tr>
+      <tr>
+        <td>Upper Gloucester Road / Surrey Street</td>
+        <td>0</td>
+        <td>16</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill" style="width:0%"></span></span>
+            <em>0%</em>
+          </span>
+        </td>
+        <td><span class="pill warn">empty</span></td>
+      </tr>
+      <tr>
+        <td>King Alfred</td>
+        <td>0</td>
+        <td>15</td>
+        <td>
+          <span class="util">
+            <span class="util-track"><span class="util-fill" style="width:0%"></span></span>
+            <em>0%</em>
+          </span>
+        </td>
+        <td><span class="pill bad">offline</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p class="table-note">Top stations by bikes plus the empties most worth rebalancing. Hover charts for capacity and zone.</p>
+</section>
+
+<section id="activity">
+<h2><span class="num">05</span><span>Pipeline activity</span></h2>
+<ul class="feed">
+  <li>
+    <time>ETL</time>
+    <span class="what">Snapshot loaded: <strong>119 stations</strong> from <code>data_20261104T045733Z.csv</code></span>
+    <span class="where">extract + transform</span>
+  </li>
+  <li>
+    <time>DQ</time>
+    <span class="what"><strong>capacity_matches_reported_docks</strong> — 82 stations where capacity != total_docks_reported</span>
+    <span class="where">quality check</span>
+  </li>
+  <li>
+    <time>DQ</time>
+    <span class="what"><strong>utilisation_within_capacity</strong> — 4 stations report more bikes than capacity</span>
+    <span class="where">quality check</span>
+  </li>
+  <li>
+    <time>DQ</time>
+    <span class="what"><strong>stations_available</strong> — 4 stations are not available</span>
+    <span class="where">quality check</span>
+  </li>
+  <li>
+    <time>TOP</time>
+    <span class="what"><strong>Preston Park / Preston Road</strong> has 18 bikes and 4 free docks</span>
+    <span class="where">BTN_Phase_2 · 128.6%</span>
+  </li>
+  <li>
+    <time>TOP</time>
+    <span class="what"><strong>Hove Lawns</strong> has 15 bikes and 20 free docks</span>
+    <span class="where">BTN_Phase_2 · 31.9%</span>
+  </li>
+  <li>
+    <time>TOP</time>
+    <span class="what"><strong>Preston Circus</strong> has 14 bikes and 4 free docks</span>
+    <span class="where">BTN_Phase_2 · 155.6%</span>
+  </li>
+  <li>
+    <time>TOP</time>
+    <span class="what"><strong>Moulsecoomb Way</strong> has 13 bikes and 4 free docks</span>
+    <span class="where">BTN_Phase_2 · 100.0%</span>
+  </li>
+</ul>
+</section>
+
+<section id="quality">
+<h2><span class="num">06</span><span>Data quality</span></h2>
+<div class="note-grid">
+  <article class="note-card">
+    <h4>Capacity Matches Reported Docks</h4>
+    <p>82 stations where capacity != total_docks_reported</p>
+  </article>
+  <article class="note-card">
+    <h4>Utilisation Within Capacity</h4>
+    <p>4 stations report more bikes than capacity</p>
+  </article>
+  <article class="note-card">
+    <h4>Stations Available</h4>
+    <p>4 stations are not available</p>
+  </article>
+  <article class="note-card">
+    <h4>Snapshot context</h4>
+    <p>Captured <code>2026-11-04T04:57:33.955683+00:00</code> from <code>Beryl</code>. Feed age <code>482s</code>.</p>
+  </article>
+</div>
+</section>
+
+<section id="next">
+<h2><span class="num">07</span><span>Recommended actions</span></h2>
+<ol>
+  <li>Run the collector on a schedule to build a time series; this single snapshot cannot show change over time.</li>
+  <li>Rebalance the 20 empty stations before the next commute peak.</li>
+  <li>Check the 4 stations that are not available before publishing them as usable capacity.</li>
+  <li>Investigate 4 stations reporting more bikes than capacity; clamp or correct their source values.</li>
+  <li>Reconcile 82 capacity mismatches between <code>capacity</code> and <code>total_docks_reported</code>.</li>
+  <li><strong>BTN_Phase_2</strong> holds the most bikes (460) at 32.5% utilisation.</li>
+</ol>
+</section>
+
+      <div class="colophon">
+        ETL + analytics over <code>data_20261104T045733Z.csv</code> &middot; 119 stations &middot; generated by <code>src/pipeline.py</code>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  var toc = document.getElementById('toc');
+  var links = toc.querySelectorAll('a');
+  var sections = [];
+  links.forEach(function(a){
+    var id = a.getAttribute('href').slice(1);
+    var el = document.getElementById(id);
+    if (el) sections.push({link:a, el:el});
+  });
+  function onScroll(){
+    var y = window.scrollY + 80;
+    var active = null;
+    for (var i = 0; i < sections.length; i++){
+      if (y >= sections[i].el.offsetTop) active = sections[i];
+    }
+    sections.forEach(function(s){ s.link.classList.remove('active'); });
+    if (active) active.link.classList.add('active');
+    var bar = document.getElementById('bar');
+    var doc = document.documentElement;
+    var pct = doc.scrollTop / (doc.scrollHeight - doc.clientHeight);
+    bar.style.width = Math.max(0, Math.min(1, pct || 0)) * 100 + '%';
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
+
+</script>
+<button id="stylebtn" type="button" aria-expanded="false" aria-controls="stylepanel"
+        aria-label="Site customiser" title="Site customiser">Aa</button>
+
+<aside id="stylepanel" hidden aria-label="Site customiser">
+  <div class="sp-head">
+    <h2>Site customiser</h2>
+    <select id="sp-mode" aria-label="Colour mode">
+      <option value="auto">System</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+    <button id="sp-close" type="button" aria-label="Close site customiser">&#10005;</button>
+  </div>
+  <div class="sp-body" id="sp-body"></div>
+  <div class="sp-foot">
+    <button id="sp-reset" type="button">Reset</button>
+    <span class="spacer"></span>
+    <button id="sp-copy" type="button">Copy CSS</button>
+  </div>
+</aside>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     Site customiser - Light / Dark / System only.
+     The page's CSS custom properties are the settings schema, so
+     the panel can never drift from the stylesheet. Colours are kept
+     per mode, and every control writes to both the TOC sidebar and
+     the content pane because they share the same tokens.
+     ============================================================ */
+
+  var FONT_OPTIONS = {
+    serif: [
+      { label: 'Iowan / Palatino', value: "'Iowan Old Style',Palatino,'Palatino Linotype','Book Antiqua',Georgia,serif" },
+      { label: 'Georgia', value: "Georgia,'Times New Roman',serif" },
+      { label: 'Charter / Cambria', value: "Charter,'Bitstream Charter',Cambria,Georgia,serif" },
+      { label: 'System serif', value: "ui-serif,'New York',Times,serif" }
+    ],
+    sans: [
+      { label: 'System sans', value: "-apple-system,'Segoe UI',Inter,Helvetica,Arial,sans-serif" },
+      { label: 'Inter / Helvetica', value: "Inter,'Helvetica Neue',Helvetica,Arial,sans-serif" },
+      { label: 'Arial', value: "Arial,'Helvetica Neue',Helvetica,sans-serif" },
+      { label: 'Verdana', value: "Verdana,Geneva,Tahoma,sans-serif" }
+    ],
+    mono: [
+      { label: 'JetBrains Mono', value: "'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Consolas,monospace" },
+      { label: 'SF Mono / Consolas', value: "ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" },
+      { label: 'Consolas', value: "Consolas,'Courier New',monospace" },
+      { label: 'Courier', value: "'Courier New',Courier,monospace" }
+    ]
+  };
+
+  var SPEC = [
+    { table: 'type', title: 'Type', items: [
+      { key: 'root_size', cssVar: '--root-size', kind: 'number', unit: 'px', min: 16, max: 40, step: 0.5, def: 24, label: 'Text size' },
+      { key: 'lh_body', cssVar: '--lh-body', kind: 'number', unit: '', min: 1.2, max: 2.2, step: 0.01, def: 1.66, label: 'Line height' },
+      { key: 'fs_code', cssVar: '--fs-code', kind: 'number', unit: 'rem', min: 0.6, max: 1.2, step: 0.005, def: 0.775, label: 'Code size' }
+    ] },
+    { table: 'layout', title: 'Layout', items: [
+      { key: 'sidebar', cssVar: '--sidebar', kind: 'number', unit: 'rem', min: 12, max: 30, step: 0.25, def: 19.25, label: 'Sidebar width' },
+      { key: 'measure', cssVar: '--measure', kind: 'number', unit: 'rem', min: 30, max: 72, step: 1, def: 46, label: 'Reading column' }
+    ] },
+    { table: 'fonts', title: 'Fonts', items: [
+      { key: 'serif', cssVar: '--serif', kind: 'font', options: FONT_OPTIONS.serif, def: FONT_OPTIONS.serif[0].value, label: 'Headings (serif)' },
+      { key: 'sans', cssVar: '--sans', kind: 'font', options: FONT_OPTIONS.sans, def: FONT_OPTIONS.sans[0].value, label: 'Body (sans)' },
+      { key: 'mono', cssVar: '--mono', kind: 'font', options: FONT_OPTIONS.mono, def: FONT_OPTIONS.mono[0].value, label: 'Code (mono)' }
+    ] },
+    { table: 'colors', title: 'Colours', colors: true, items: [
+      { key: 'paper', cssVar: '--paper', kind: 'color', label: 'Page background' },
+      { key: 'surface', cssVar: '--surface', kind: 'color', label: 'Sidebar / panel' },
+      { key: 'ivory', cssVar: '--ivory', kind: 'color', label: 'Cards and inputs' },
+      { key: 'ink', cssVar: '--ink', kind: 'color', label: 'Headings' },
+      { key: 'prose', cssVar: '--prose', kind: 'color', label: 'Body text' },
+      { key: 'muted', cssVar: '--muted', kind: 'color', label: 'Secondary text' },
+      { key: 'stone', cssVar: '--stone', kind: 'color', label: 'Faint labels' },
+      { key: 'line', cssVar: '--line', kind: 'color', label: 'Borders' },
+      { key: 'line_soft', cssVar: '--line-soft', kind: 'color', label: 'Hairlines' },
+      { key: 'tint', cssVar: '--tint', kind: 'color', label: 'Active nav' },
+      { key: 'terra', cssVar: '--terra', kind: 'color', label: 'Accent' },
+      { key: 'terra_dark', cssVar: '--terra-dark', kind: 'color', label: 'Links / eyebrow' },
+      { key: 'amber', cssVar: '--amber', kind: 'color', label: 'Warnings' },
+      { key: 'code_bg', cssVar: '--code-bg', kind: 'color', label: 'Code background' },
+      { key: 'code_bar', cssVar: '--code-bar', kind: 'color', label: 'Code caption bar' },
+      { key: 'code_line', cssVar: '--code-line', kind: 'color', label: 'Code border' },
+      { key: 'code_ink', cssVar: '--code-ink', kind: 'color', label: 'Code text' },
+      { key: 'code_dim', cssVar: '--code-dim', kind: 'color', label: 'Code comments' },
+      { key: 'code_accent', cssVar: '--code-accent', kind: 'color', label: 'Code caption text' }
+    ] }
+  ];
+
+  var DEFAULTS = {
+    base: {
+      root_size: 24, lh_body: 1.66, fs_code: 0.775, sidebar: 19.25, measure: 46,
+      serif: FONT_OPTIONS.serif[0].value,
+      sans: FONT_OPTIONS.sans[0].value,
+      mono: FONT_OPTIONS.mono[0].value
+    },
+    colors: {
+      light: {
+        paper: '#f0eee6', surface: '#fbfaf7', ivory: '#fffdfa', ink: '#1f1e1d',
+        prose: '#33302c', muted: '#55524c', stone: '#8c877c',
+        line: '#e0dbcf', line_soft: '#e9e4d8', tint: '#f6ede6',
+        terra: '#d97757', terra_dark: '#c9633f', amber: '#b9862f',
+        code_bg: '#23211e', code_bar: '#2b2823', code_line: '#3a3732',
+        code_ink: '#f2ece1', code_dim: '#a9a294', code_accent: '#f0b49a'
+      },
+      dark: {
+        paper: '#14171b', surface: '#1b1f24', ivory: '#232830', ink: '#eef2f6',
+        prose: '#c7d0d8', muted: '#9aa7b4', stone: '#7f8c99',
+        line: '#303944', line_soft: '#263039', tint: '#252f3b',
+        terra: '#e08a6a', terra_dark: '#eda07e', amber: '#d3a44a',
+        code_bg: '#111418', code_bar: '#181d22', code_line: '#2b343e',
+        code_ink: '#eef2f6', code_dim: '#8f9ba7', code_accent: '#f0b49a'
+      }
+    }
+  };
+
+  var INIT_MODE = 'auto';
+  var STORE = 'mca-site-customiser:v2';
+
+  var root = document.documentElement;
+  var darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  var clone = function (o) { return JSON.parse(JSON.stringify(o)); };
+  var copy = function (target, source) {
+    Object.keys(target).forEach(function (k) { delete target[k]; });
+    Object.keys(clone(source)).forEach(function (k) { target[k] = clone(source)[k]; });
+  };
+
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) { saved = {}; }
+
+  var state = {
+    mode: saved.mode === 'light' || saved.mode === 'dark' || saved.mode === 'auto' ? saved.mode : INIT_MODE,
+    base: Object.assign(clone(DEFAULTS.base), saved.base || {}),
+    colors: {
+      light: Object.assign(clone(DEFAULTS.colors.light), (saved.colors || {}).light || {}),
+      dark: Object.assign(clone(DEFAULTS.colors.dark), (saved.colors || {}).dark || {})
+    }
+  };
+
+  var resolved = function () {
+    return state.mode === 'auto' ? (darkQuery && darkQuery.matches ? 'dark' : 'light') : state.mode;
+  };
+  var currentColors = function () { return state.colors[resolved()]; };
+
+  var cssVal = function (item, value) {
+    return item.unit ? value + item.unit : String(value);
+  };
+
+  var apply = function () {
+    root.setAttribute('data-theme', resolved());
+
+    SPEC.forEach(function (group) {
+      group.items.forEach(function (item) {
+        var value = item.kind === 'color' ? currentColors()[item.key] : state.base[item.key];
+        if (value === undefined || value === null || value === '') root.style.removeProperty(item.cssVar);
+        else root.style.setProperty(item.cssVar, cssVal(item, value));
+      });
+    });
+  };
+
+  var persist = function () {
+    try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* private mode */ }
+  };
+
+  /* ---- build the panel ---- */
+  var panel = document.getElementById('stylepanel');
+  var button = document.getElementById('stylebtn');
+  var panelBody = document.getElementById('sp-body');
+  var modeSelect = document.getElementById('sp-mode');
+  var refs = {};
+
+  var hex6 = function (value) {
+    var v = String(value || '').trim().replace('#', '');
+    if (v.length === 3) v = v.split('').map(function (c) { return c + c; }).join('');
+    return '#' + v.slice(0, 6).padStart(6, '0');
+  };
+
+  var ensureFontOption = function (select, value) {
+    if (!value) return;
+    var found = Array.prototype.some.call(select.options, function (opt) { return opt.value === value; });
+    if (!found) {
+      var option = document.createElement('option');
+      option.value = value;
+      option.textContent = 'Custom';
+      select.appendChild(option);
+    }
+  };
+
+  var addGroup = function (group) {
+    var wrap = document.createElement('div');
+    wrap.className = 'sp-group';
+
+    var title = document.createElement('h3');
+    title.textContent = group.title;
+    if (group.colors) {
+      var tag = document.createElement('span');
+      tag.className = 'tag';
+      tag.id = 'sp-modetag';
+      title.appendChild(tag);
+    }
+    wrap.appendChild(title);
+
+    if (group.colors) {
+      var grid = document.createElement('div');
+      grid.className = 'sp-colors';
+      group.items.forEach(function (item) {
+        var label = document.createElement('label');
+        var swatch = document.createElement('input');
+        swatch.type = 'color';
+        swatch.title = item.label + '  (' + item.cssVar + ')';
+        swatch.setAttribute('aria-label', item.label);
+        var name = document.createElement('span');
+        name.className = 'swatch-label';
+        name.textContent = item.label;
+        var hex = document.createElement('span');
+        hex.className = 'hex';
+        label.append(swatch, name, hex);
+        grid.appendChild(label);
+
+        swatch.addEventListener('input', function () {
+          currentColors()[item.key] = swatch.value;
+          hex.textContent = swatch.value;
+          apply();
+          persist();
+        });
+        refs[item.key] = { swatch: swatch, hex: hex };
+      });
+      wrap.appendChild(grid);
+      panelBody.appendChild(wrap);
+      return;
+    }
+
+    group.items.forEach(function (item) {
+      var row = document.createElement('div');
+      row.className = 'sp-row';
+      var label = document.createElement('label');
+      label.textContent = item.label;
+      row.appendChild(label);
+
+      if (item.kind === 'font') {
+        var select = document.createElement('select');
+        select.setAttribute('aria-label', item.label);
+        (item.options || []).forEach(function (option) {
+          var opt = document.createElement('option');
+          opt.value = option.value;
+          opt.textContent = option.label;
+          select.appendChild(opt);
+        });
+        ensureFontOption(select, state.base[item.key]);
+        select.value = state.base[item.key] || (item.options && item.options[0] ? item.options[0].value : '');
+        label.appendChild(select);
+        select.addEventListener('change', function () {
+          state.base[item.key] = select.value;
+          apply();
+          persist();
+        });
+        refs[item.key] = { select: select };
+      } else {
+        var out = document.createElement('output');
+        row.appendChild(out);
+        var input = document.createElement('input');
+        input.type = 'range';
+        input.min = item.min;
+        input.max = item.max;
+        input.step = item.step;
+        input.setAttribute('aria-label', item.label);
+        row.appendChild(input);
+        input.addEventListener('input', function () {
+          state.base[item.key] = Number(input.value);
+          out.textContent = input.value + (item.unit || '');
+          apply();
+          persist();
+        });
+        refs[item.key] = { input: input, out: out };
+      }
+      wrap.appendChild(row);
+    });
+
+    panelBody.appendChild(wrap);
+  };
+
+  SPEC.forEach(addGroup);
+
+  var refresh = function () {
+    if (modeSelect.value !== state.mode) modeSelect.value = state.mode;
+    var mode = resolved();
+    var modeTag = document.getElementById('sp-modetag');
+    if (modeTag) modeTag.textContent = mode;
+    if (button) button.title = 'Site customiser - ' + mode + ' mode';
+
+    SPEC.forEach(function (group) {
+      group.items.forEach(function (item) {
+        var ref = refs[item.key];
+        if (!ref) return;
+        if (item.kind === 'color') {
+          var value = currentColors()[item.key] || '#000000';
+          ref.swatch.value = hex6(value);
+          ref.hex.textContent = String(value);
+        } else if (item.kind === 'font') {
+          var font = state.base[item.key] || '';
+          ensureFontOption(ref.select, font);
+          ref.select.value = font;
+        } else {
+          var n = state.base[item.key];
+          ref.input.value = n;
+          ref.out.textContent = n + (item.unit || '');
+        }
+      });
+    });
+  };
+
+  var reopen = function () { apply(); refresh(); };
+
+  modeSelect.addEventListener('change', function () {
+    state.mode = modeSelect.value;
+    reopen();
+    persist();
+  });
+
+  var onSystemChange = function () { if (state.mode === 'auto') reopen(); };
+  if (darkQuery) {
+    if (darkQuery.addEventListener) darkQuery.addEventListener('change', onSystemChange);
+    else if (darkQuery.addListener) darkQuery.addListener(onSystemChange);
+  }
+  window.addEventListener('focus', onSystemChange);
+
+  document.getElementById('sp-reset').addEventListener('click', function () {
+    copy(state.base, DEFAULTS.base);
+    copy(state.colors.light, DEFAULTS.colors.light);
+    copy(state.colors.dark, DEFAULTS.colors.dark);
+    state.mode = INIT_MODE;
+    try { localStorage.removeItem(STORE); } catch (e) { /* ignore */ }
+    reopen();
+  });
+
+  var toCss = function () {
+    var lines = [
+      '/* generated by the site customiser - ' + resolved() + ' mode */',
+      '/* paste into the page <style>; rebuild after editing the palette */',
+      ':root{'
+    ];
+    SPEC.forEach(function (group) {
+      if (group.colors) return;
+      group.items.forEach(function (item) {
+        lines.push('  ' + item.cssVar + ':' + cssVal(item, state.base[item.key]) + ';');
+      });
+    });
+    var colorItems = SPEC[SPEC.length - 1].items;
+    colorItems.forEach(function (item) {
+      lines.push('  ' + item.cssVar + ':' + state.colors.light[item.key] + ';');
+    });
+    lines.push('}', '', 'html[data-theme="dark"]{');
+    colorItems.forEach(function (item) {
+      lines.push('  ' + item.cssVar + ':' + state.colors.dark[item.key] + ';');
+    });
+    lines.push('}');
+    return lines.join('\n');
+  };
+
+  var copyText = function (text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return false; });
+    }
+    var area = document.createElement('textarea');
+    area.value = text;
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    area.remove();
+    return Promise.resolve(ok);
+  };
+
+  var copyBtn = document.getElementById('sp-copy');
+  copyBtn.addEventListener('click', function () {
+    copyText(toCss()).then(function (ok) {
+      copyBtn.textContent = ok ? 'Copied' : 'Copy failed';
+      setTimeout(function () { copyBtn.textContent = 'Copy CSS'; }, 1600);
+    });
+  });
+
+  var toggle = function (open) {
+    panel.hidden = !open;
+    button.setAttribute('aria-expanded', String(open));
+    if (open) { refresh(); }
+  };
+
+  button.addEventListener('click', function () { toggle(panel.hidden); });
+  document.getElementById('sp-close').addEventListener('click', function () { toggle(false); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !panel.hidden) toggle(false);
+  });
+
+  apply();
+  refresh();
+})();
+
+</script>
+<button id="chatbtn" type="button" aria-expanded="false" aria-controls="chatpanel"
+        aria-label="Ask the dashboard" title="Ask the dashboard">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+  </svg>
+</button>
+
+<aside id="chatpanel" hidden aria-label="Ask the dashboard">
+  <div class="chat-head">
+    <div class="chat-title-wrap">
+      <p class="chat-kicker">Dashboard assistant</p>
+      <h2>Ask the dashboard</h2>
+    </div>
+    <div class="chat-actions">
+      <button id="chat-expand" type="button" aria-pressed="false"
+              aria-label="Expand chat to two thirds of the screen" title="Expand to 2/3 width">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 4H4v5"/><path d="M15 4h5v5"/>
+          <path d="M20 15v5h-5"/><path d="M4 15v5h5"/>
+        </svg>
+      </button>
+      <button id="chat-close" type="button" aria-label="Close chat">&#10005;</button>
+    </div>
+  </div>
+  <div class="chat-log" id="chat-log" role="log" aria-live="polite">
+    <div class="chat-msg bot">Ask about this snapshot: 119 stations, 510 bikes, 756 free docks. Answers use the dashboard data only.</div>
+  </div>
+  <div class="chat-chips" id="chat-chips">
+      <button type="button" class="chat-chip">Which stations are empty right now?</button>
+      <button type="button" class="chat-chip">Where are the most bikes concentrated?</button>
+      <button type="button" class="chat-chip">Which stations should be rebalanced first?</button>
+      <button type="button" class="chat-chip">What data quality issues matter most?</button>
+  </div>
+  <form class="chat-form" id="chat-form">
+    <textarea id="chat-input" rows="1" aria-label="Your question"
+      placeholder="Ask about a station, zone, or metric…"></textarea>
+    <button id="chat-send" type="submit">Send</button>
+  </form>
+  <p class="chat-foot" id="chat-foot">Uses the current model · snapshot data only</p>
+</aside>
+
+<script>window.DASHBOARD_CHAT = {"endpoint":"/api/chat","suggestions":["Which stations are empty right now?","Where are the most bikes concentrated?","Which stations should be rebalanced first?","What data quality issues matter most?"]};</script>
+<script>
+/* ============================================================
+   Dashboard chat widget.
+   The page injects window.DASHBOARD_CHAT = { endpoint, suggestions }
+   when the dashboard payload contains a `chat` object.
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var cfg = window.DASHBOARD_CHAT || {};
+  var button = document.getElementById('chatbtn');
+  var panel = document.getElementById('chatpanel');
+  if (!button || !panel) return;
+
+  var log = document.getElementById('chat-log');
+  var form = document.getElementById('chat-form');
+  var input = document.getElementById('chat-input');
+  var send = document.getElementById('chat-send');
+  var close = document.getElementById('chat-close');
+  var expand = document.getElementById('chat-expand');
+  var foot = document.getElementById('chat-foot');
+  var chips = document.getElementById('chat-chips');
+  var history = [];
+  var busy = false;
+
+  function endpointCandidates() {
+    var list = [];
+    var configured = cfg.endpoint || '/api/chat';
+    var isAbsolute = /^https?:\/\//i.test(configured);
+    if (isAbsolute) {
+      list.push(configured);
+    } else if (location.protocol !== 'file:') {
+      list.push(configured);
+    }
+    var host = location.hostname || '127.0.0.1';
+    var fallback = cfg.fallbackEndpoint || ('http://' + host + ':5000/api/chat');
+    if (list.indexOf(fallback) === -1) list.push(fallback);
+    if (host !== '127.0.0.1' && list.indexOf('http://127.0.0.1:5000/api/chat') === -1) {
+      list.push('http://127.0.0.1:5000/api/chat');
+    }
+    return list;
+  }
+
+  function postQuestion(question, prior) {
+    var candidates = endpointCandidates();
+    var index = 0;
+    var lastError = null;
+
+    function attempt() {
+      var url = candidates[index++];
+      return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: question, history: prior })
+      }).then(function (response) {
+        return response.json().catch(function () { return {}; }).then(function (body) {
+          if (response.ok) return body;
+          var error = new Error(body.error || ('Request failed (' + response.status + ')'));
+          error.status = response.status;
+          error.endpoint = url;
+          // 404/405/501 usually mean the page is served by a static preview,
+          // not the dashboard Flask server. Try the localhost fallback.
+          if ([404, 405, 501].indexOf(response.status) !== -1 && index < candidates.length) {
+            return attempt();
+          }
+          throw error;
+        });
+      }).catch(function (error) {
+        if (error && error.status) throw error;
+        lastError = error;
+        if (index < candidates.length) return attempt();
+        throw lastError || error;
+      });
+    }
+
+    return attempt();
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* Small, safe Markdown subset: code fences, inline code, bold, bullets. */
+  function render(text) {
+    var raw = String(text == null ? '' : text);
+    var parts = raw.split(/```/);
+    return parts.map(function (part, index) {
+      if (index % 2 === 1) {
+        var code = part.replace(/^[a-zA-Z0-9_-]*\n/, '').replace(/\n$/, '');
+        return '<pre><code>' + escapeHtml(code) + '</code></pre>';
+      }
+      var safe = escapeHtml(part);
+      safe = safe.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+      safe = safe.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+      safe = safe.replace(/(^|\n)[-*]\s+(.+)/g, '$1<li>$2</li>');
+      if (safe.indexOf('<li>') !== -1) {
+        safe = safe.replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>');
+      }
+      safe = safe.replace(/\n/g, '<br>');
+      return safe;
+    }).join('');
+  }
+
+  function addMessage(role, text, isError) {
+    var message = document.createElement('div');
+    message.className = 'chat-msg ' + role + (isError ? ' error' : '');
+    message.innerHTML = render(text);
+    log.appendChild(message);
+    log.scrollTop = log.scrollHeight;
+    return message;
+  }
+
+  function addTyping() {
+    var message = document.createElement('div');
+    message.className = 'chat-msg bot chat-typing';
+    message.innerHTML = '<span></span><span></span><span></span>';
+    log.appendChild(message);
+    log.scrollTop = log.scrollHeight;
+    return message;
+  }
+
+  function setBusy(value) {
+    busy = value;
+    send.disabled = value;
+    input.disabled = value;
+    send.textContent = value ? '…' : 'Send';
+  }
+
+  var WIDE_KEY = 'dashboard-chat-wide';
+
+  function setWide(wide) {
+    panel.classList.toggle('chat-wide', wide);
+    if (expand) {
+      expand.setAttribute('aria-pressed', String(wide));
+      expand.setAttribute('aria-label', wide
+        ? 'Restore chat width'
+        : 'Expand chat to two thirds of the screen');
+      expand.title = wide ? 'Restore chat width' : 'Expand to 2/3 width';
+    }
+    try { localStorage.setItem(WIDE_KEY, wide ? '1' : '0'); } catch (e) { /* ignore */ }
+  }
+
+  function openPanel(open) {
+    panel.hidden = !open;
+    button.setAttribute('aria-expanded', String(open));
+    if (open) {
+      resizeInput();
+      setTimeout(function () { input.focus(); }, 30);
+    }
+  }
+
+  function resizeInput() {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 104) + 'px';
+  }
+
+  function ask(question) {
+    var text = String(question || '').trim();
+    if (!text || busy) return;
+
+    var prior = history.slice(-8);
+    addMessage('user', text);
+    history.push({ role: 'user', content: text });
+    input.value = '';
+    resizeInput();
+    setBusy(true);
+    var typing = addTyping();
+
+    postQuestion(text, prior)
+      .then(function (body) {
+        if (typing.parentNode) typing.parentNode.removeChild(typing);
+        var answer = body.answer || 'The model returned no answer.';
+        addMessage('bot', answer);
+        history.push({ role: 'assistant', content: answer });
+        if (body.model && foot) {
+          foot.textContent = 'Model: ' + body.model + ' · snapshot data only';
+        }
+      })
+      .catch(function (error) {
+        if (typing.parentNode) typing.parentNode.removeChild(typing);
+        var detail = error.message || 'Unknown network error';
+        if (error.status === 405 || error.status === 404 || error.status === 501) {
+          detail = 'This page is not being served by the dashboard server (HTTP ' + error.status + '). '
+            + 'Run `uv run src/server.py --open` and open http://127.0.0.1:5000/ — or keep the server running on port 5000 while using your preview server.';
+        } else if (!error.status) {
+          detail = 'No chat endpoint answered. Start the local server with `uv run src/server.py --open` (port 5000), then try again.';
+        }
+        addMessage('bot', 'Could not reach the dashboard model. ' + detail, true);
+      })
+      .then(function () {
+        setBusy(false);
+        input.focus();
+      });
+  }
+
+  button.addEventListener('click', function () {
+    openPanel(panel.hidden);
+  });
+  close.addEventListener('click', function () {
+    openPanel(false);
+    button.focus();
+  });
+  if (expand) {
+    expand.addEventListener('click', function () {
+      setWide(!panel.classList.contains('chat-wide'));
+    });
+    try {
+      if (localStorage.getItem(WIDE_KEY) === '1') setWide(true);
+    } catch (e) { /* storage unavailable */ }
+  }
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && !panel.hidden) {
+      openPanel(false);
+      button.focus();
+    }
+  });
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    ask(input.value);
+  });
+  input.addEventListener('input', resizeInput);
+  input.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      ask(input.value);
+    }
+  });
+
+  if (chips) {
+    chips.addEventListener('click', function (event) {
+      var chip = event.target.closest('.chat-chip');
+      if (chip) ask(chip.textContent);
+    });
+  }
+
+  resizeInput();
+})();
+
+</script>
+</body>
+</html>

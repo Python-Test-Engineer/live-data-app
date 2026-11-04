@@ -1,0 +1,365 @@
+{
+  "page": {
+    "title": "Dummy Dashboard · live-data-app",
+    "eyebrow": "Dummy dashboard · template preview",
+    "h1": "Live data dashboard",
+    "lede": "A placeholder dashboard that uses the same two-pane reading-guide template as make-html-from-md. Swap the dummy values in data/dummy-data.json for real feeds.",
+    "meta": [
+      "Dummy data",
+      "7 sections",
+      "Updated 4 Nov 2026",
+      "Template preview"
+    ],
+    "tocTitle": "Dashboard template",
+    "sideSub": "Sticky contents, scroll-spy, progress bar and the Aa appearance panel.",
+    "sideFoot": "Dummy TOC for future use<br>Edit <code>data/dummy-data.json</code> to wire real data"
+  },
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Overview",
+      "level": 2
+    },
+    {
+      "id": "kpis",
+      "title": "KPI cards",
+      "level": 2
+    },
+    {
+      "id": "trend",
+      "title": "Trend and breakdown",
+      "level": 2
+    },
+    {
+      "id": "stations",
+      "title": "Station table",
+      "level": 2
+    },
+    {
+      "id": "activity",
+      "title": "Activity feed",
+      "level": 2
+    },
+    {
+      "id": "quality",
+      "title": "Data quality notes",
+      "level": 2
+    },
+    {
+      "id": "next",
+      "title": "Next steps",
+      "level": 2
+    }
+  ],
+  "kpis": [
+    {
+      "label": "Total stations",
+      "value": "119",
+      "unit": "",
+      "delta": "+2",
+      "direction": "up",
+      "tone": "default",
+      "hint": "Dummy count, last snapshot"
+    },
+    {
+      "label": "Bikes available",
+      "value": "684",
+      "unit": "",
+      "delta": "+4.2%",
+      "direction": "up",
+      "tone": "good",
+      "hint": "Sum across all stations"
+    },
+    {
+      "label": "Free docks",
+      "value": "1,032",
+      "unit": "",
+      "delta": "-1.1%",
+      "direction": "down",
+      "tone": "warn",
+      "hint": "Docks with no bike"
+    },
+    {
+      "label": "Utilisation",
+      "value": "39.8",
+      "unit": "%",
+      "delta": "0.0%",
+      "direction": "flat",
+      "tone": "default",
+      "hint": "Bikes / total capacity"
+    }
+  ],
+  "trend": {
+    "title": "Bikes and docks over time",
+    "sub": "Dummy series · 12 snapshots",
+    "labels": [
+      "08:00",
+      "08:30",
+      "09:00",
+      "09:30",
+      "10:00",
+      "10:30",
+      "11:00",
+      "11:30",
+      "12:00",
+      "12:30",
+      "13:00",
+      "13:30"
+    ],
+    "series": [
+      {
+        "name": "Bikes",
+        "color": "#d97757",
+        "area": true,
+        "values": [
+          512,
+          548,
+          601,
+          644,
+          690,
+          725,
+          702,
+          668,
+          631,
+          604,
+          628,
+          684
+        ]
+      },
+      {
+        "name": "Free docks",
+        "color": "#6f9a6a",
+        "area": false,
+        "values": [
+          1210,
+          1178,
+          1124,
+          1082,
+          1030,
+          995,
+          1022,
+          1056,
+          1093,
+          1120,
+          1094,
+          1032
+        ]
+      }
+    ],
+    "breakdownTitle": "Where the bikes are",
+    "breakdownTotal": "684",
+    "breakdownUnit": "bikes",
+    "breakdown": [
+      {
+        "label": "Seafront",
+        "value": 46,
+        "color": "#d97757"
+      },
+      {
+        "label": "City centre",
+        "value": 28,
+        "color": "#b9862f"
+      },
+      {
+        "label": "Stations",
+        "value": 17,
+        "color": "#6f9a6a"
+      },
+      {
+        "label": "Other",
+        "value": 9,
+        "color": "#8c877c"
+      }
+    ],
+    "breakdownBarsTitle": "Bikes by area",
+    "breakdownBars": [
+      {
+        "label": "Seafront",
+        "value": 315,
+        "color": "#d97757"
+      },
+      {
+        "label": "City centre",
+        "value": 192,
+        "color": "#b9862f"
+      },
+      {
+        "label": "Stations",
+        "value": 116,
+        "color": "#6f9a6a"
+      },
+      {
+        "label": "Other",
+        "value": 61,
+        "color": "#8c877c"
+      }
+    ],
+    "histogram": {
+      "title": "Utilisation distribution",
+      "sub": "station count per band",
+      "bins": [
+        {
+          "label": "0%",
+          "count": 20
+        },
+        {
+          "label": "1–25%",
+          "count": 30
+        },
+        {
+          "label": "26–50%",
+          "count": 33
+        },
+        {
+          "label": "51–75%",
+          "count": 21
+        },
+        {
+          "label": "76–100%",
+          "count": 11
+        },
+        {
+          "label": ">100%",
+          "count": 4
+        }
+      ]
+    }
+  },
+  "stations": [
+    {
+      "name": "Brighton Station",
+      "bikes": 18,
+      "docks": 4,
+      "capacity": 24,
+      "status": "warn",
+      "statusLabel": "busy"
+    },
+    {
+      "name": "Pier Approach",
+      "bikes": 3,
+      "docks": 20,
+      "capacity": 24,
+      "status": "good"
+    },
+    {
+      "name": "North Laine",
+      "bikes": 11,
+      "docks": 13,
+      "capacity": 24,
+      "status": "good"
+    },
+    {
+      "name": "Hove Lawns",
+      "bikes": 22,
+      "docks": 2,
+      "capacity": 24,
+      "status": "bad"
+    },
+    {
+      "name": "Black Rock",
+      "bikes": 7,
+      "docks": 17,
+      "capacity": 24,
+      "status": "good"
+    },
+    {
+      "name": "Seven Dials",
+      "bikes": 15,
+      "docks": 9,
+      "capacity": 24,
+      "status": "good"
+    },
+    {
+      "name": "Kemptown",
+      "bikes": 2,
+      "docks": 22,
+      "capacity": 24,
+      "status": "good"
+    }
+  ],
+  "activity": [
+    {
+      "time": "13:28",
+      "text": "<strong>Brighton Station</strong> lost 4 bikes",
+      "where": "snapshot diff",
+      "status": "warn"
+    },
+    {
+      "time": "13:22",
+      "text": "<strong>Pier Approach</strong> gained 6 bikes",
+      "where": "snapshot diff",
+      "status": "good"
+    },
+    {
+      "time": "13:14",
+      "text": "Feed refresh completed in 812 ms",
+      "where": "GBFS pipeline",
+      "status": "good"
+    },
+    {
+      "time": "13:02",
+      "text": "<strong>Hove Lawns</strong> nearly full",
+      "where": "threshold alert",
+      "status": "bad"
+    },
+    {
+      "time": "12:55",
+      "text": "Pricing feed unchanged",
+      "where": "system_pricing_plans",
+      "status": "flat"
+    }
+  ],
+  "notes": [
+    {
+      "title": "Placeholder data",
+      "body": "Every number on this page is dummy data from <code>data/dummy-data.json</code>. Nothing is fetched at build time."
+    },
+    {
+      "title": "Same template",
+      "body": "The shell, sidebar, progress bar and Aa customiser are copied from <code>make-html-from-md</code>, so pages look identical."
+    },
+    {
+      "title": "Safe to extend",
+      "body": "Add or remove sections in <code>data.sections</code> and the sidebar TOC updates automatically."
+    }
+  ],
+  "next": [
+    "Replace <code>data/dummy-data.json</code> with a real export from the ETL pipeline.",
+    "Render charts as inline SVG so the page stays a single self-contained file.",
+    "Keep the <code>Aa</code> button id and <code>#stylepanel</code> markup intact so saved appearance settings keep working."
+  ],
+  "chat": {
+    "endpoint": "/api/chat",
+    "kicker": "Dashboard assistant",
+    "title": "Ask the dashboard",
+    "placeholder": "Ask about a station, zone, or metric…",
+    "greeting": "Ask me about this dashboard. Answers use the snapshot data only.",
+    "foot": "Uses the current model with the dashboard snapshot.",
+    "suggestions": [
+      "Which stations are empty?",
+      "Which zone has the most bikes?",
+      "What should I look at first?"
+    ],
+    "fallbackEndpoint": "http://127.0.0.1:5000/api/chat"
+  },
+  "overview": {
+    "lede": "This is the base dashboard template: a two-pane shell, KPI cards, inline SVG charts, a station table, and an optional chat panel. Replace the dummy values in data/dummy-data.json.",
+    "callout": "<strong>Base template.</strong> The shell, tables, charts, print styles, <code>Aa</code> appearance panel, and chat launcher are all wired. Keep the template files intact and only swap the payload.",
+    "notes": [
+      {
+        "title": "Dummy payload",
+        "body": "Every value comes from <code>data/dummy-data.json</code>; nothing is fetched at build time."
+      },
+      {
+        "title": "Self-contained output",
+        "body": "The builder inlines the CSS, inline SVG charts, and widget JavaScript into one HTML file."
+      },
+      {
+        "title": "Optional features",
+        "body": "Chat, histogram, zone bars, overview copy, station note, and colophon are opt-in fields in the payload."
+      }
+    ]
+  },
+  "stationsNote": "Dummy rows. Replace <code>stations</code> with real station rows; <code>statusLabel</code> is optional.",
+  "colophon": "Base template built with <code>make-html-dashboard</code> &middot; 7 sections &middot; same shell as <code>make-html-from-md</code>"
+}

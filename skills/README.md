@@ -3,57 +3,67 @@
 Portable skill bundles kept in this repo so they can be exported and dropped
 into any Hermes install.
 
-## make-book
+## make-html-dashboard — base template v1.0.0
 
-Turns a Markdown document into the same kind of single-file, two-pane guide as
-this repo's `book.html` — sticky contents pane with filter and scroll-spy,
-terracotta/serif house style, and the live **Aa** appearance panel (type,
-layout, fonts, light/dark colours, Copy TOML).
+The canonical dashboard shell. Builds a single-file HTML dashboard with the same
+two-pane reading-guide template as `make-html-from-md`: sticky numbered TOC,
+scroll-spy, progress bar, warm-neutral type, inline SVG charts, and the round
+**Aa** appearance panel (System / Light / Dark, type, layout, fonts, colours,
+Copy CSS). An optional bottom-left chat launcher is included.
 
 ```
-make-book/
-  SKILL.md                  when to use it, workflow, panel internals, pitfalls
-  scripts/build_book.py     Markdown -> single-file HTML (CSS + JS inlined)
-  assets/book_theme.toml    default theme: colours, fonts, sizes, layout
-  references/theme-keys.md  every key, CSS variable and panel range
+make-html-dashboard/
+  README.md                     quick start and base-template overview
+  SKILL.md                      when to use it, data contract, template rules
+  template.json                 base-template version + entry points
+  scripts/build_dashboard.mjs   JSON payload -> single-file HTML
+  assets/theme.css              shared reading-guide shell
+  assets/dashboard.css          KPI cards, charts, table, feed, histogram
+  assets/customiser.js          Aa appearance panel
+  assets/chat.css / chat.js     optional chat launcher + panel
+  data/dummy-data.json          dummy payload exercising every optional field
+  examples/dashboard.html       generated base-template preview
 ```
-
-### Install
-
-Copy the folder into a Hermes skills directory:
-
-```bash
-# this profile
-cp -r skills/make-book ~/AppData/Local/hermes/skills/software-development/
-
-# any other profile
-cp -r skills/make-book <hermes-home>/profiles/<name>/skills/software-development/
-```
-
-Hermes picks it up on the next session (`skills_list` / `skill_view(make-book)`).
 
 ### Use without installing
 
-The generator is standalone — Python 3.11+, `markdown` as the only dependency:
-
 ```bash
-cd skills/make-book
-uv run --with markdown python scripts/build_book.py --help
+cd skills/make-html-dashboard
+node scripts/build_dashboard.mjs
+# writes examples/dashboard.html
 
-# rebuild this repo's book through the skill instead of build_book.py
-cd ../..
-uv run --with markdown python skills/make-book/scripts/build_book.py \
-    --src EXPLAINER.md --out /tmp/book-skills.html --theme book_theme.toml \
-    --title "Nanocode, explained" \
-    --eyebrow "Build your own coding agent" \
-    --subtitle "A chapter-by-chapter walkthrough for students."
+node scripts/build_dashboard.mjs \
+    --data data/dummy-data.json \
+    --out /tmp/dashboard.html \
+    --title "Acme ops" \
+    --h1 "Operations dashboard"
 ```
 
-`--theme` defaults to `book_theme.toml` in the working directory; start from
-`assets/book_theme.toml` and edit, or open the built page and use **Copy TOML**.
+Node 18+ is enough; no npm install, no runtime dependencies. Copy
+`data/dummy-data.json`, swap in real data, and keep the shell assets intact.
+`template.json` carries the version; bump it when the payload contract or
+required ids change.
+
+The optional chat widget needs a same-origin endpoint. In this repo,
+`uv run src/server.py --open` serves the built dashboard and answers questions
+with the current model plus the ETL data as context.
+
+### Install
+
+```bash
+cp -r skills/make-html-dashboard ~/AppData/Local/hermes/skills/software-development/
+# or
+cp -r skills/make-html-dashboard <hermes-home>/profiles/<name>/skills/software-development/
+```
 
 ### Export as an archive
 
 ```bash
-cd skills && tar -czf make-book.tgz make-book     # or: zip -r make-book.zip make-book
+cd skills && zip -r make-html-dashboard.zip make-html-dashboard
 ```
+
+## make-html-from-md
+
+Converts long-form Markdown into a single-file reading guide using the same
+shell as the dashboard skill. See `make-html-from-md/SKILL.md` for the reference
+implementation and the `Aa` panel requirements.

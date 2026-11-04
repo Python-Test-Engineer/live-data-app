@@ -1,0 +1,101 @@
+{
+  "source_rows": 119,
+  "clean_rows": 119,
+  "columns": 49,
+  "snapshot_utc": "2026-11-04T04:57:33.955683+00:00",
+  "system": "Beryl",
+  "feed_age_seconds": 482,
+  "null_cells": 0,
+  "duplicate_station_ids": 0,
+  "checks": [
+    {
+      "name": "required_columns",
+      "status": "pass",
+      "count": 0,
+      "detail": "All required columns present"
+    },
+    {
+      "name": "unique_station_ids",
+      "status": "pass",
+      "count": 0,
+      "detail": "station_id is unique"
+    },
+    {
+      "name": "unique_station_names",
+      "status": "pass",
+      "count": 0,
+      "detail": "station names are unique"
+    },
+    {
+      "name": "null_cells",
+      "status": "pass",
+      "count": 0,
+      "detail": "No null cells after transformation"
+    },
+    {
+      "name": "positive_capacity",
+      "status": "pass",
+      "count": 0,
+      "detail": "All capacities are positive"
+    },
+    {
+      "name": "non_negative_counts",
+      "status": "pass",
+      "count": 0,
+      "detail": "Bike and dock counts are non-negative"
+    },
+    {
+      "name": "plausible_coordinates",
+      "status": "pass",
+      "count": 0,
+      "detail": "Coordinates look plausible"
+    },
+    {
+      "name": "capacity_matches_reported_docks",
+      "status": "warn",
+      "count": 82,
+      "detail": "82 stations where capacity != total_docks_reported"
+    },
+    {
+      "name": "utilisation_within_capacity",
+      "status": "warn",
+      "count": 4,
+      "detail": "4 stations report more bikes than capacity"
+    },
+    {
+      "name": "stations_available",
+      "status": "warn",
+      "count": 4,
+      "detail": "4 stations are not available"
+    },
+    {
+      "name": "feed_freshness",
+      "status": "pass",
+      "count": 482,
+      "detail": "Oldest feed age is 482s (threshold 600s)"
+    }
+  ],
+  "issues": [
+    {
+      "name": "capacity_matches_reported_docks",
+      "status": "warn",
+      "count": 82,
+      "detail": "82 stations where capacity != total_docks_reported"
+    },
+    {
+      "name": "utilisation_within_capacity",
+      "status": "warn",
+      "count": 4,
+      "detail": "4 stations report more bikes than capacity"
+    },
+    {
+      "name": "stations_available",
+      "status": "warn",
+      "count": 4,
+      "detail": "4 stations are not available"
+    }
+  ],
+  "generated_utc": "2026-11-04T07:35:20.943664+00:00",
+  "source": "C:\\Users\\mrcra\\Desktop\\live-data-app\\data\\data_20261104T045733Z.csv",
+  "source_file": "data_20261104T045733Z.csv"
+}
